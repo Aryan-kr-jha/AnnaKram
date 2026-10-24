@@ -151,6 +151,7 @@ exports.ingestBatch = async (req, res, next) => {
       initialStatus
     ];
 
+    const result = await db.query(insertQuery, values);
     const insertedBatch = result.rows[0];
     // Attach commodity name and storage age
     try {
