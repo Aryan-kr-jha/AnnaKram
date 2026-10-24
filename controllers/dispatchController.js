@@ -1,6 +1,5 @@
 // controllers/dispatchController.js - AnnaKram iPDS Inventory Dispatch & Allocation Engine
 const db = require('../db');
-const { analyzeAllocationRisk } = require('../services/airiskChecker');
 
 /**
  * 1. FIFO PREVIEW (Read-Only)
@@ -83,42 +82,12 @@ exports.previewFIFOAllocation = async (req, res, next) => {
       qtyStillNeeded -= pickQty;
     }
 
-    // Context for AI Risk Checker
-    const maxStorageDays = allocations.length > 0 
-      ? Math.max(...allocations.map(a => a.days_in_storage))
-      : 0;
-    const totalRemainingAfter = Number((totalAvailable - targetQty).toFixed(2));
-
-    const commRes = await db.query('SELECT name FROM commodities WHERE id = $1', [parsedCommodityId]);
-    const commodityName = commRes.rows[0]?.name || 'Commodity';
-
-    // Call Gemini AI Risk Checker with built-in safety and fallback
-    let aiRiskAssessment = null;
-    try {
-      aiRiskAssessment = await analyzeAllocationRisk({
-        commodityName,
-        requestedQty: targetQty,
-        totalRemainingStock: totalRemainingAfter,
-        allocations,
-        daysInStorageMax: maxStorageDays
-      });
-    } catch (aiErr) {
-      console.warn('[AI ADVISORY WARNING]:', aiErr.message);
-      aiRiskAssessment = {
-        risk_level: 'MODERATE',
-        risk_summary: 'Algorithmic allocation verified. AI advisory service temporarily unavailable.',
-        flags: ['Manual verification of physical bags recommended'],
-        recommended_action: 'Proceed with standard physical inspection.'
-      };
-    }
-
     return res.status(200).json({
       success: true,
       mode: 'STANDARD_FIFO',
       total_requested: targetQty,
       batches_used_count: allocations.length,
-      allocations,
-      ai_risk_assessment: aiRiskAssessment
+      allocations
     });
   } catch (error) {
     next(error);

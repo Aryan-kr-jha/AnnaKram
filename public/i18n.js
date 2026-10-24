@@ -76,8 +76,6 @@ const ANNAKRAM_I18N = {
     modeManualBatch: "Manual Batch Selection (Audited Override)",
     btnCalculateFifo: "Calculate FIFO Allocation Split",
     btnConfirmDispatch: "Confirm Allocation & Generate Delivery Challan",
-    aiAdvisoryTitle: "Gemini AI Stock Risk Advisory",
-    aiAdvisoryAction: "Superintendent Advisory:",
 
     // Godown Stacks & Batches
     batchesTitle: "Depot Batch Register & Storage Age Ledger",
@@ -309,8 +307,6 @@ const ANNAKRAM_I18N = {
     modeManualBatch: "मैन्युअल बैच चयन (ऑडिट अपवाद)",
     btnCalculateFifo: "FIFO आवंटन विभाजन की गणना करें",
     btnConfirmDispatch: "आवंटन की पुष्टि करें एवं डिलीवरी चालान जारी करें",
-    aiAdvisoryTitle: "जेमिनी AI स्टॉक जोखिम परामर्श",
-    aiAdvisoryAction: "अधीक्षक परामर्श निर्देश:",
 
     // Godown Stacks & Batches
     batchesTitle: "डिपो बैच रजिस्टर एवं भंडारण आयु लेज़र",

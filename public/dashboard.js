@@ -1466,25 +1466,10 @@ async function handleFIFOPreview() {
             remaining_after_pick: Number((availableQty - required_qty).toFixed(2))
         }];
 
-        const manualAiAssessment = isFIFOOverrideTriggered
-            ? {
-                risk_level: 'HIGH',
-                risk_summary: `FIFO Sequence Override detected. Designated batch ${chosenBatch.batch_number} (${chosenBatch.days_in_storage} days in storage) bypasses older eligible stock ${oldestBatch ? oldestBatch.batch_number : 'N/A'} (${oldestBatch ? oldestBatch.days_in_storage : 0} days in storage).`,
-                flags: ['FIFO Sequence Break', 'Older Grain Age Stagnation Risk', 'Statutory Section 7(a) Audit Required'],
-                recommended_action: 'Superintendent override code and inspection remarks must be recorded before stock deduction.'
-            }
-            : {
-                risk_level: 'LOW',
-                risk_summary: `Manual batch selection adheres to standard FIFO chronological allocation. Oldest batch ${chosenBatch.batch_number} (${chosenBatch.days_in_storage} days in storage) prioritized for clearance.`,
-                flags: ['FIFO Chronological Match', 'Fresh Quality Verified'],
-                recommended_action: 'Proceed with standard gate delivery challan generation.'
-            };
-
         renderSplitPreview({
             mode: isFIFOOverrideTriggered ? 'FIFO_OVERRIDE' : 'MANUAL_OLDEST',
             batches_used_count: 1,
-            allocations: activeAllocations,
-            ai_risk_assessment: manualAiAssessment
+            allocations: activeAllocations
         });
     }
 }
@@ -1497,52 +1482,6 @@ function safeEscapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
-}
-
-function buildAiRiskCardHtml(assessment) {
-    if (!assessment) return '';
-    const level = String(assessment.risk_level || 'LOW').toUpperCase();
-    let themeClass = 'risk-low';
-    let badgeClass = 'risk-badge-low';
-    if (level === 'MEDIUM' || level === 'MODERATE') {
-        themeClass = 'risk-medium';
-        badgeClass = 'risk-badge-medium';
-    } else if (level === 'HIGH') {
-        themeClass = 'risk-high';
-        badgeClass = 'risk-badge-high';
-    } else if (level === 'CRITICAL') {
-        themeClass = 'risk-critical';
-        badgeClass = 'risk-badge-critical';
-    }
-
-    const flags = Array.isArray(assessment.flags) && assessment.flags.length > 0
-        ? `<div class="ai-risk-flags">${assessment.flags.map(f => `<span class="ai-flag-tag">⚠️ ${safeEscapeHtml(f)}</span>`).join('')}</div>`
-        : '';
-
-    const summary = safeEscapeHtml(assessment.risk_summary || 'Algorithmic allocation evaluated by AI.');
-    const action = safeEscapeHtml(assessment.recommended_action || 'Proceed with standard physical verification.');
-
-    return `
-        <div class="ai-risk-card ${themeClass}">
-            <div class="ai-risk-header">
-                <div class="ai-risk-title">
-                    <span class="ai-sparkle-icon">✨</span>
-                    <span>Gemini AI Stock Risk Advisory</span>
-                </div>
-                <span class="ai-risk-pill ${badgeClass}">
-                    <span class="ai-pulse-dot"></span>
-                    ${level} RISK
-                </span>
-            </div>
-            <div class="ai-risk-summary">
-                ${summary}
-            </div>
-            ${flags}
-            <div class="ai-risk-action">
-                <strong>📋 Superintendent Advisory:</strong> ${action}
-            </div>
-        </div>
-    `;
 }
 
 function renderSplitPreview(data) {
@@ -1600,8 +1539,6 @@ function renderSplitPreview(data) {
         `;
     }
 
-    const aiRiskCardHTML = buildAiRiskCardHtml(data.ai_risk_assessment);
-
     previewBox.innerHTML = `
         <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -1637,8 +1574,6 @@ function renderSplitPreview(data) {
         </table>
 
         ${warningBannerHTML}
-
-        ${aiRiskCardHTML}
 
         <button id="confirmDispatchBtn" class="gov-btn ${isFIFOOverrideTriggered ? 'btn-disabled-override' : ''}" style="width: 100%;" ${isFIFOOverrideTriggered ? 'disabled' : ''} onclick="confirmDispatchOrder()">
             ${isFIFOOverrideTriggered ? '⚠️ Enter Override Reason &amp; Remarks to Enable Confirmation' : 'Confirm Allocation &amp; Generate Delivery Challan'}
