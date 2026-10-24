@@ -397,24 +397,52 @@ function initUI() {
     setInterval(updateClock, 1000);
     updateClock();
 
-    // B. Hamburger Toggle (Opens and Closes Sidebar cleanly)
+    // B. Hamburger Toggle (Opens and Closes Sidebar cleanly on Desktop & Mobile)
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    const toggleSidebar = () => {
+        if (!sidebar) return;
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('mobile-open');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.toggle('active', sidebar.classList.contains('mobile-open'));
+            }
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
+    };
+
+    const closeMobileSidebar = () => {
+        if (sidebar && sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+        }
+        if (sidebarBackdrop && sidebarBackdrop.classList.contains('active')) {
+            sidebarBackdrop.classList.remove('active');
+        }
+    };
 
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            sidebar.classList.toggle('collapsed');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('collapsed');
-                }
-            }
+            toggleSidebar();
         });
     }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', () => {
+            closeMobileSidebar();
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && sidebar && sidebarToggle) {
+            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                closeMobileSidebar();
+            }
+        }
+    });
 
     // C. Profile Dropdown Animation
     const profileTrigger = document.getElementById('profileDropdownTrigger');
@@ -447,6 +475,11 @@ function initUI() {
             const targetContainer = document.getElementById(`view-${targetView}`);
             if (targetContainer) {
                 targetContainer.classList.add('active');
+            }
+
+            // Auto-close sidebar on mobile once a tab is selected
+            if (window.innerWidth <= 768) {
+                closeMobileSidebar();
             }
 
             if (targetView === 'stacks') fetchInventory();

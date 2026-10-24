@@ -239,6 +239,36 @@ function initUI(sb) {
   });
   document.addEventListener('click', () => pMenu.classList.remove('show'));
 
+  // Mobile Drawer Toggle & Backdrop for FPS Portal
+  const fpsSidebarToggle = document.getElementById('fpsSidebarToggle');
+  const fpsSidebar = document.getElementById('sidebar');
+  const fpsSidebarBackdrop = document.getElementById('fpsSidebarBackdrop');
+
+  const closeFpsMobileSidebar = () => {
+    if (fpsSidebar && fpsSidebar.classList.contains('mobile-open')) {
+      fpsSidebar.classList.remove('mobile-open');
+    }
+    if (fpsSidebarBackdrop && fpsSidebarBackdrop.classList.contains('active')) {
+      fpsSidebarBackdrop.classList.remove('active');
+    }
+  };
+
+  if (fpsSidebarToggle && fpsSidebar) {
+    fpsSidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fpsSidebar.classList.toggle('mobile-open');
+      if (fpsSidebarBackdrop) {
+        fpsSidebarBackdrop.classList.toggle('active', fpsSidebar.classList.contains('mobile-open'));
+      }
+    });
+  }
+
+  if (fpsSidebarBackdrop) {
+    fpsSidebarBackdrop.addEventListener('click', () => {
+      closeFpsMobileSidebar();
+    });
+  }
+
   const logoutBtn = document.getElementById('logoutButton');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
@@ -268,6 +298,11 @@ function initUI(sb) {
       if(target.dataset.view === 'inventory') title = 'Live Shop Inventory';
       if(target.dataset.view === 'returns') title = 'Return Leftover Stock to Godown';
       document.getElementById('pageTitle').textContent = title;
+
+      // Close mobile drawer on item select
+      if (window.innerWidth <= 768) {
+        closeFpsMobileSidebar();
+      }
     });
   });
 

@@ -37,15 +37,24 @@
         <p>AnnaKram Terminal v2.4<br>Govt. of India</p>
       </div>
     </aside>
+    <div class="sidebar-backdrop" id="fpsSidebarBackdrop"></div>
 
     <!-- Main Workspace -->
     <main class="main-workspace">
       <!-- Top Header -->
       <header class="top-header">
         <div class="header-left">
-          <h2 id="pageTitle" data-i18n="navFpsDashboard">Dashboard</h2>
-          <span class="sub-breadcrumb" id="fpsLicenseText" data-i18n="fpsLicenseSubtext">FPS-NOD-101 • Sector 12,
-            Noida</span>
+          <button id="fpsSidebarToggle" class="icon-btn" aria-label="Toggle Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="header-titles-box">
+            <h2 id="pageTitle" data-i18n="navFpsDashboard">Dashboard</h2>
+            <span class="sub-breadcrumb" id="fpsLicenseText" data-i18n="fpsLicenseSubtext">FPS-NOD-101 • Sector 12, Noida</span>
+          </div>
         </div>
 
         <div class="header-right">
@@ -204,21 +213,23 @@
               </button>
             </div>
             <div class="panel-body">
-              <table class="gov-table inventory-table">
-                <thead>
-                  <tr>
-                    <th data-i18n="colCommodityType">Commodity Type</th>
-                    <th style="text-align: right;" data-i18n="colAvailableNet">Available Quantity (Net On-Floor)</th>
-                    <th style="text-align: center; width: 220px;" data-i18n="colReverseLogistics">Reverse Logistics
-                      Action</th>
-                  </tr>
-                </thead>
-                <tbody id="inventoryTableBody">
-                  <tr>
-                    <td colspan="3" class="empty-state">Syncing live inventory...</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="table-responsive">
+                <table class="gov-table inventory-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="colCommodityType">Commodity Type</th>
+                      <th style="text-align: right;" data-i18n="colAvailableNet">Available Quantity (Net On-Floor)</th>
+                      <th style="text-align: center; width: 220px;" data-i18n="colReverseLogistics">Reverse Logistics
+                        Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inventoryTableBody">
+                    <tr>
+                      <td colspan="3" class="empty-state">Syncing live inventory...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
