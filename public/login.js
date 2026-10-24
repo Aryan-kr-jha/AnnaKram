@@ -198,66 +198,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Translation Function
   function applyLanguage(selectedLang) {
-    lang = selectedLang;
-    localStorage.setItem('annakram_lang', lang);
-    const t = translations[lang];
+    lang = selectedLang || 'en';
+    try {
+      localStorage.setItem('annakram_lang', lang);
+    } catch (e) {}
+    const t = translations[lang] || translations.en;
 
     // Toggle button active states
     if (lang === 'en') {
-      langEn.classList.add('active');
-      langHi.classList.remove('active');
+      if (langEn) langEn.classList.add('active');
+      if (langHi) langHi.classList.remove('active');
     } else {
-      langHi.classList.add('active');
-      langEn.classList.remove('active');
+      if (langHi) langHi.classList.add('active');
+      if (langEn) langEn.classList.remove('active');
     }
 
+    document.documentElement.lang = lang;
+    document.title = (lang === 'hi') ? 'अन्नक्रम पोर्टल लॉगिन' : 'AnnaKram Portal Login';
+
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    const setHtml = (id, html) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    };
+
     // Static text updates
-    document.getElementById('txtPortalTitle').textContent = t.portalTitle;
-    document.getElementById('txtGovCloud').textContent = t.govCloud;
-    document.getElementById('txtHeroTitle').textContent = t.heroTitle;
-    document.getElementById('txtSignInTab').textContent = t.signInTab;
-    document.getElementById('txtSignUpTab').textContent = t.signUpTab;
-    document.getElementById('txtSelectRole').childNodes[0].nodeValue = t.selectRole + ' ';
-    document.getElementById('txtRoleManager').textContent = t.roleManager;
-    document.getElementById('txtRoleManagerSub').innerHTML = t.roleManagerSub;
-    document.getElementById('txtRoleFps').textContent = t.roleFps;
-    document.getElementById('txtRoleFpsSub').textContent = t.roleFpsSub;
-    document.getElementById('lblFullName').textContent = t.fullName;
-    document.getElementById('lblEmail').textContent = t.email;
-    document.getElementById('lblPassword').textContent = t.password;
-    document.getElementById('lblConfirmPassword').textContent = t.confirmPassword;
-    forgotPassLink.textContent = t.forgotPass;
+    setText('txtPortalTitle', t.portalTitle);
+    setText('txtHeroTitle', t.heroTitle);
+    setText('txtSignInTab', t.signInTab);
+    setText('txtSignUpTab', t.signUpTab);
+    setHtml('txtSelectRole', `${t.selectRole} <span class="req-star">*</span>`);
+    setText('txtRoleManager', t.roleManager);
+    setHtml('txtRoleManagerSub', t.roleManagerSub);
+    setText('txtRoleFps', t.roleFps);
+    setText('txtRoleFpsSub', t.roleFpsSub);
+
+    setText('lblFullName', t.fullName);
+    setText('lblEmail', t.email);
+    setText('lblPassword', t.password);
+    setText('lblConfirmPassword', t.confirmPassword);
+    if (forgotPassLink) forgotPassLink.textContent = t.forgotPass;
 
     // Sliding panel text (UI-only)
-    document.getElementById('txtToggleLeftTitle').textContent = t.toggleLeftTitle;
-    document.getElementById('txtToggleLeftText').textContent = t.toggleLeftText;
-    document.getElementById('txtToggleRightTitle').textContent = t.toggleRightTitle;
-    document.getElementById('txtToggleRightText').textContent = t.toggleRightText;
-    toggleToSignIn.textContent = t.signInTab;
-    toggleToSignUp.textContent = t.signUpTab;
+    setText('txtToggleLeftTitle', t.toggleLeftTitle);
+    setText('txtToggleLeftText', t.toggleLeftText);
+    setText('txtToggleRightTitle', t.toggleRightTitle);
+    setText('txtToggleRightText', t.toggleRightText);
+    if (toggleToSignIn) toggleToSignIn.textContent = t.signInTab;
+    if (toggleToSignUp) toggleToSignUp.textContent = t.signUpTab;
 
     // Dynamic Role Labels & Placeholders
     if (role === 'Godown Manager') {
-      lblEntityId.textContent = t.entityIdManager;
-      entityIdInput.placeholder = t.depotPlaceholder;
+      if (lblEntityId) lblEntityId.textContent = t.entityIdManager;
+      if (entityIdInput) entityIdInput.placeholder = t.depotPlaceholder;
     } else {
-      lblEntityId.textContent = t.entityIdFps;
-      entityIdInput.placeholder = t.fpsPlaceholder;
+      if (lblEntityId) lblEntityId.textContent = t.entityIdFps;
+      if (entityIdInput) entityIdInput.placeholder = t.fpsPlaceholder;
     }
 
-    userNameInput.placeholder = t.namePlaceholder;
-    userPassInput.placeholder = t.passPlaceholder;
-    confirmPassInput.placeholder = t.confirmPassPlaceholder;
+    if (userNameInput) userNameInput.placeholder = t.namePlaceholder;
+    if (userPassInput) userPassInput.placeholder = t.passPlaceholder;
+    if (confirmPassInput) confirmPassInput.placeholder = t.confirmPassPlaceholder;
 
     // Tab-dependent action button & switcher text
     if (activeTab === 'login') {
-      submitBtnText.textContent = t.signInBtn;
-      footerAccountText.textContent = t.dontHaveAccount;
-      bottomSwitchLink.textContent = t.signUpTab;
+      if (submitBtnText) submitBtnText.textContent = t.signInBtn;
+      if (footerAccountText) footerAccountText.textContent = t.dontHaveAccount;
+      if (bottomSwitchLink) bottomSwitchLink.textContent = t.signUpTab;
     } else {
-      submitBtnText.textContent = t.signUpBtn;
-      footerAccountText.textContent = t.alreadyHaveAccount;
-      bottomSwitchLink.textContent = t.signInTab;
+      if (submitBtnText) submitBtnText.textContent = t.signUpBtn;
+      if (footerAccountText) footerAccountText.textContent = t.alreadyHaveAccount;
+      if (bottomSwitchLink) bottomSwitchLink.textContent = t.signInTab;
     }
   }
 
