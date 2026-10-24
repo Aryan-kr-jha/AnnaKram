@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnnaKram</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <!-- html2canvas library for JPG / JPEG challan image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- html5-qrcode library for camera & image QR scanning -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- AnnaKram Central Translation Engine -->
+    <script src="i18n.js"></script>
+</head>
+
+<body>
+
+    <!-- Top GovTech Navigation Bar -->
+    <header class="gov-header">
+        <div class="header-left">
+            <button id="sidebarToggle" class="icon-btn" aria-label="Toggle Navigation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="header-titles">
+                <span class="dept-title" data-i18n="deptTitle">DEPARTMENT OF FOOD &amp; PUBLIC DISTRIBUTION</span>
+                <span class="depot-subtext" data-i18n="depotSubtext">DEPOT-GRN-04: Greater Noida Central Buffer Godown |
+                    Regional Depot: Meerut
+                    Division</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Language Translation Switcher Button -->
+            <div class="lang-toggle" role="group" aria-label="Language">
+                <button type="button" class="lang-btn active" id="langEn">EN</button>
+                <button type="button" class="lang-btn" id="langHi">हिन्दी</button>
+            </div>
+
+            <div class="clock-display" id="clock24">00:00:00 IST - 00/00/0000</div>
+
+            <!-- Profile Dropdown Component -->
+            <div class="profile-container" id="profileDropdownTrigger">
+                <div class="avatar-badge">AK</div>
+                <div class="profile-meta">
+                    <span class="profile-name">Aryan Kumar</span>
+                    <span class="profile-role" data-i18n="godownSuperintendent">Godown Superintendent</span>
+                </div>
+                <svg class="dropdown-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+
+                <div class="dropdown-menu" id="profileMenu">
+                    <a href="#" class="dropdown-item" data-i18n="profileOverview">Profile Overview</a>
+                    <hr class="dropdown-divider">
+                    <a href="#" class="dropdown-item logout" data-i18n="signOut">Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="gov-sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linejoin="round">
+                            <path
+                                d="M12 19C12.2094 19 12.4041 18.9011 12.7934 18.7032L15.9228 17.1128C17.3076 16.4091 18 16.0572 18 15.5V8.5M12 19C11.7906 19 11.5959 18.9011 11.2066 18.7032L8.07717 17.1128C6.69239 16.4091 6 16.0572 6 15.5V8.5M12 19V12M6 8.5C6 9.05722 6.69239 9.40909 8.07717 10.1128L11.2066 11.7032C11.5959 11.9011 11.7906 12 12 12C12.2094 12 12.4041 11.9011 12.7934 11.7032L15.9228 10.1128C17.3076 9.40909 18 9.05722 18 8.5C18 7.94278 17.3076 7.59091 15.9228 6.88716L12.7934 5.29679C12.4041 5.09893 12.2094 5 12 5C11.7906 5 11.5959 5.09893 11.2066 5.29679L8.07717 6.88716C6.69239 7.59091 6 7.94278 6 8.5Z">
+                            </path>
+                            <path
+                                d="M13.1901 21.576L17.8842 19.3041C19.9614 18.2987 21 17.796 21 17V7C21 6.20397 19.9614 5.70129 17.8842 4.69594L13.1901 2.42399L13.1901 2.42398C12.6061 2.14133 12.3141 2 12 2C11.6859 2 11.3939 2.14133 10.8099 2.42399L6.11576 4.69594C4.03859 5.70129 3 6.20397 3 7V17C3 17.796 4.03858 18.2987 6.11572 19.304L6.11576 19.3041L10.8099 21.576C11.3939 21.8587 11.6859 22 12 22C12.3141 22 12.6061 21.8587 13.1901 21.576Z">
+                            </path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navCentralDashboard">Central Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="stacks">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M7 22V14C7 12.1144 7 11.1716 7.58579 10.5858C8.17157 10 9.11438 10 11 10H13C14.8856 10 15.8284 10 16.4142 10.5858C17 11.1716 17 12.1144 17 14V22H7Z">
+                            </path>
+                            <path d="M7 14H17"></path>
+                            <path d="M7 18H17"></path>
+                            <path
+                                d="M18.1287 5.23204L15.1287 3.39725C13.6056 2.46575 12.8441 2 12 2C11.1559 2 10.3944 2.46575 8.8713 3.39725L5.8713 5.23204C4.46832 6.0901 3.76683 6.51912 3.38341 7.20331C3 7.8875 3 8.71027 3 10.3558V15.9952C3 18.8259 3 20.2412 3.87868 21.1206C4.75736 22 6.17157 22 9 22H15C17.8284 22 19.2426 22 20.1213 21.1206C21 20.2412 21 18.8259 21 15.9952V10.3558C21 8.71027 21 7.8875 20.6166 7.20331C20.2332 6.51912 19.5317 6.0901 18.1287 5.23204Z">
+                            </path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navStackBays">Warehouse</span>
+                </button>
+                <button class="nav-item" data-view="requests">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="17" cy="18" r="2"></circle>
+                            <circle cx="7" cy="18" r="2"></circle>
+                            <path
+                                d="M5 17.9724C3.90328 17.9178 3.2191 17.7546 2.73223 17.2678C2.24536 16.7809 2.08222 16.0967 2.02755 15M9 18H15M19 17.9724C20.0967 17.9178 20.7809 17.7546 21.2678 17.2678C22 16.5355 22 15.357 22 13V11H17.3C16.5555 11 16.1832 11 15.882 10.9021C15.2731 10.7043 14.7957 10.2269 14.5979 9.61803C14.5 9.31677 14.5 8.94451 14.5 8.2C14.5 7.08323 14.5 6.52485 14.3532 6.07295C14.0564 5.15964 13.3404 4.44358 12.4271 4.14683C11.9752 4 11.4168 4 10.3 4H2"
+                                stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M2 8H8" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M2 11H6" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path
+                                d="M14.5 6H16.3212C17.7766 6 18.5042 6 19.0964 6.35371C19.6886 6.70742 20.0336 7.34811 20.7236 8.6295L22 11"
+                                stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navIndentRequisitions">FPS Requests</span>
+                </button>
+                <button class="nav-item" data-view="scanner">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84664 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132">
+                            </path>
+                            <path d="M16 7V17"></path>
+                            <path d="M12 7V13"></path>
+                            <path d="M12 17V17.01"></path>
+                            <path d="M8 7V17"></path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navActiveBatches">e-Way Bill Scanner</span>
+                </button>
+                <button class="nav-item" data-view="challan">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M8.06805 2.72546L7.89604 2.86189C7.71084 3.00878 7.61823 3.08223 7.52605 3.12852C7.20698 3.28874 6.8259 3.26781 6.52663 3.07364C6.44017 3.01754 6.35631 2.93441 6.1886 2.76813C5.78856 2.37152 5.58853 2.17321 5.43777 2.10043C4.89824 1.83999 4.25045 2.10601 4.0547 2.6684C4 2.82556 4 3.10601 4 3.66691V20.698C4 20.9548 4 21.0832 4.01158 21.158C4.12554 21.8938 4.98624 22.2473 5.59159 21.8069C5.65313 21.7621 5.74474 21.6713 5.92789 21.4897C6.0431 21.3755 6.10079 21.3183 6.15539 21.2735C6.66242 20.8578 7.38352 20.8182 7.93376 21.1759C7.99303 21.2144 8.05667 21.2649 8.18395 21.3658L8.32009 21.4738C8.55044 21.6565 8.66564 21.7479 8.78105 21.8104C9.22912 22.053 9.77088 22.053 10.219 21.8104C10.3344 21.7479 10.4495 21.6565 10.6799 21.4738L10.75 21.4182C11.047 21.1827 11.1955 21.0649 11.3484 20.9918C11.7601 20.7949 12.2399 20.7949 12.6516 20.9918C12.8045 21.0649 12.953 21.1827 13.25 21.4182L13.3201 21.4738C13.5505 21.6565 13.6656 21.7479 13.781 21.8104C14.2291 22.053 14.7709 22.053 15.219 21.8104C15.3344 21.7479 15.4496 21.6565 15.6799 21.4738L15.816 21.3658C15.9433 21.2649 16.007 21.2144 16.0662 21.1759C16.6165 20.8182 17.3376 20.8578 17.8446 21.2735C17.8992 21.3183 17.9569 21.3755 18.0721 21.4897C18.2553 21.6713 18.3469 21.7621 18.4084 21.8069C19.0138 22.2473 19.8745 21.8938 19.9884 21.158C20 21.0832 20 20.9548 20 20.698V3.66691C20 3.10601 20 2.82556 19.9453 2.6684C19.7495 2.10601 19.1018 1.83999 18.5622 2.10043C18.4115 2.17321 18.2114 2.37152 17.8114 2.76813C17.6437 2.93441 17.5598 3.01754 17.4734 3.07364C17.1741 3.26781 16.793 3.28874 16.4739 3.12852C16.3818 3.08223 16.2892 3.00878 16.104 2.86189L15.932 2.72546C15.4614 2.35223 15.2261 2.16562 14.9695 2.08178C14.6646 1.98214 14.3354 1.98214 14.0305 2.08178C13.7739 2.16562 13.5386 2.35224 13.068 2.72546L13 2.77943C12.6428 3.06273 12.4642 3.20438 12.2661 3.2586C12.092 3.30627 11.908 3.30627 11.7339 3.2586C11.5358 3.20438 11.3572 3.06273 11 2.77943L10.932 2.72546C10.4614 2.35223 10.2261 2.16562 9.96953 2.08178C9.66458 1.98214 9.33542 1.98214 9.03047 2.08178C8.7739 2.16562 8.53862 2.35223 8.06805 2.72546Z">
+                            </path>
+                            <path d="M8 12H16"></path>
+                            <path d="M8 8H12"></path>
+                            <path d="M8 16H16"></path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navDeliveryChallans">Challan Generator</span>
+                </button>
+                <button class="nav-item" data-view="history">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+                            height="24" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path
+                                d="M19.5 17.5C19.5 18.8807 18.3807 20 17 20C15.6193 20 14.5 18.8807 14.5 17.5C14.5 16.1193 15.6193 15 17 15C18.3807 15 19.5 16.1193 19.5 17.5Z">
+                            </path>
+                            <path
+                                d="M9.5 17.5C9.5 18.8807 8.38071 20 7 20C5.61929 20 4.5 18.8807 4.5 17.5C4.5 16.1193 5.61929 15 7 15C8.38071 15 9.5 16.1193 9.5 17.5Z">
+                            </path>
+                            <path
+                                d="M14.5 17.5H9.5M15 15.5V7C15 5.58579 15 4.87868 14.5607 4.43934C14.1213 4 13.4142 4 12 4H5C3.58579 4 2.87868 4 2.43934 4.43934C2 4.87868 2 5.58579 2 7V15C2 15.9346 2 16.4019 2.20096 16.75C2.33261 16.978 2.52197 17.1674 2.75 17.299C3.09808 17.5 3.56538 17.5 4.5 17.5M15.5 6.5H17.3014C18.1311 6.5 18.5459 6.5 18.8898 6.6947C19.2336 6.8894 19.4471 7.2451 19.8739 7.95651L21.5725 10.7875C21.7849 11.1415 21.8911 11.3186 21.9456 11.5151C22 11.7116 22 11.918 22 12.331V15C22 15.9346 22 16.4019 21.799 16.75C21.6674 16.978 21.478 17.1674 21.25 17.299C20.9019 17.5 20.4346 17.5 19.5 17.5"
+                                stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path
+                                d="M9.32653 12L10.8131 10.8258C11.6044 10.2008 12 9.88833 12 9.5M9.32653 7L10.8131 8.17417C11.6044 8.79917 12 9.11168 12 9.5M12 9.5L5 9.5"
+                                stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg></span>
+                    <span class="nav-text" data-i18n="navCompliance">Dispatch History</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Canvas -->
+        <main class="gov-main-content">
+
+            <!-- 4 Top Real-Time KPI Tiles -->
+            <section class="kpi-grid">
+                <div class="kpi-card anim-card">
+                    <div class="kpi-meta">
+                        <span class="kpi-label" data-i18n="kpiTotalDepotStock">TOTAL BUFFER STOCK</span>
+                        <span class="kpi-value" id="kpiTotalStock">0.00</span>
+                    </div>
+                    <span class="kpi-unit">Quintals Available in Depot</span>
+                </div>
+
+                <div class="kpi-card anim-card">
+                    <div class="kpi-meta">
+                        <span class="kpi-label" data-i18n="kpiAgingAlert">EXTENDED STORAGE NOTICE</span>
+                        <span class="kpi-value alert-text" id="kpiAgingBatches">0</span>
+                    </div>
+                    <span class="kpi-unit">Batches Stored &gt; 60 Days</span>
+                </div>
+
+                <div class="kpi-card anim-card">
+                    <div class="kpi-meta">
+                        <span class="kpi-label" data-i18n="kpiStorageLimit">INCOMING STOCK</span>
+                        <span class="kpi-value" id="kpiIncomingStock">0</span>
+                    </div>
+                    <span class="kpi-unit">Active Batches On Ledger</span>
+                </div>
+
+                <div class="kpi-card anim-card">
+                    <div class="kpi-meta">
+                        <span class="kpi-label" data-i18n="kpiPendingIndents">SERVING FPS OUTLETS</span>
+                        <span class="kpi-value" id="kpiServingFPS">3</span>
+                    </div>
+                    <span class="kpi-unit">Mandated Fair Price Distribution Centers</span>
+                </div>
+            </section>
+
+            <!-- View 1: Central Dashboard / Overview -->
+            <div id="view-dashboard" class="content-view active">
+                <!-- FIFO Priority Evacuation Radar -->
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <div class="header-badge-row">
+                            <h3 data-i18n="radarTitle">FIFO PRIORITY EVACUATION RADAR</h3>
+                            <span class="status-pill warning-pill" data-i18n="badgeRotationMandated">ROTATION
+                                MANDATED</span>
+                        </div>
+                        <span class="section-tag" data-i18n="radarSubtitle">Oldest Active Stacks Requiring Immediate
+                            Outward Priority</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="gov-table" id="radarTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="colBatchId">Batch Identifier</th>
+                                    <th data-i18n="colCommodity">Commodity Type</th>
+                                    <th data-i18n="colStackLocation">Stack Location</th>
+                                    <th data-i18n="colStorageDuration">Storage Duration</th>
+                                    <th data-i18n="colAgingGrade">Aging Grade</th>
+                                    <th data-i18n="colRemainingQty">Remaining Qty</th>
+                                    <th data-i18n="colMandatedAction">Mandated Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="radarTableBody">
+                                <tr>
+                                    <td colspan="7" class="placeholder-row">Querying priority evacuation queue...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Full-Width Live Commodity Reserve Distribution -->
+                <section class="panel-section anim-card" style="margin-top: 18px;">
+                    <div class="section-header">
+                        <h3 data-i18n="commDistributionTitle">COMMODITY RESERVE DISTRIBUTION (DEPOT TOTALS)</h3>
+                        <span class="section-tag" data-i18n="commDistributionSubtitle">Current Real-Time Storage
+                            Breakdown by Grain Type</span>
+                    </div>
+                    <div id="commodityDistribution" class="summary-list">
+                        <div class="placeholder-row">Loading live commodity reserves...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View 2: Warehouse Stacks View -->
+            <div id="view-stacks" class="content-view">
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <h3 data-i18n="stacksInventoryTitle">WAREHOUSE STACKS INVENTORY</h3>
+                        <div class="filter-group">
+                            <label for="commodityFilter" data-i18n="lblFilterGrain">Filter Grain Type:</label>
+                            <select id="commodityFilter" class="gov-select">
+                                <option value="ALL" data-i18n="optAllCommodities">All Commodities</option>
+                                <option value="1" data-i18n="commWheat">Wheat (Grade A)</option>
+                                <option value="2" data-i18n="commRice">Raw Rice (Boiled)</option>
+                                <option value="3" data-i18n="commSugar">Refined Sugar</option>
+                                <option value="4" data-i18n="commDal">Tuvar Dal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="gov-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="colBatchNo">Batch Number</th>
+                                    <th data-i18n="colCommodity">Commodity</th>
+                                    <th data-i18n="colSupplier">Supplier Source</th>
+                                    <th data-i18n="colReceiptDate">Receipt Date</th>
+                                    <th data-i18n="colDaysStored">Days Stored</th>
+                                    <th data-i18n="colAgingGrade">Aging Grade</th>
+                                    <th data-i18n="colLocation">Stack Location</th>
+                                    <th data-i18n="colBalanceQtl">Balance (Qtl)</th>
+                                    <th data-i18n="colCurrentStatus">Current Status</th>
+                                    <th data-i18n="colQualityAction">Quality Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <tr>
+                                    <td colspan="10" class="placeholder-row">Loading active stock inventory...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View 3: FPS Requests View -->
+            <div id="view-requests" class="content-view">
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <div class="header-badge-row">
+                            <h3 data-i18n="fpsRequestsTitle">FAIR PRICE SHOP (FPS) REQUISITION QUEUE</h3>
+                            <span class="status-pill active-pill" id="pendingRequestCount">0 PENDING</span>
+                        </div>
+                        <span class="section-tag" data-i18n="fpsRequestsSubtitle">Dealer Indents Received for Depot
+                            Fulfillment</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="gov-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="colRequestId">Request ID</th>
+                                    <th data-i18n="colFpsOutlet">FPS Outlet &amp; Dealer</th>
+                                    <th data-i18n="colCommodityRequested">Commodity Requested</th>
+                                    <th data-i18n="colDemandedQty">Demanded (Qtl)</th>
+                                    <th data-i18n="colFilingDate">Filing Date</th>
+                                    <th data-i18n="colStatus">Status</th>
+                                    <th data-i18n="colQuickAction">Quick Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fpsRequestsTableBody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View 4: e-Way Bill Scanner View -->
+            <div id="view-scanner" class="content-view">
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <h3 data-i18n="scannerGateTitle">e-WAY BILL &amp; MANDI TRANSIT PASS GATE INWARD</h3>
+                    </div>
+                    <div class="grid-2-col">
+                        <!-- Left: Live QR / Barcode & Transit Pass Scanner -->
+                        <div class="scanner-card anim-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="scannerSubhead">Electronic Transit Pass Scanner</h4>
+                                <span class="status-pill active-pill" data-i18n="gateScannerActive">GATE SCANNER
+                                    ACTIVE</span>
+                            </div>
+                            <p class="card-desc" data-i18n="scannerDesc">
+                                Scan the official GST e-Way Bill QR code from arrival trucks. Consignments are verified
+                                before gate admission.
+                            </p>
+
+                            <!-- Scanner Mode Switcher -->
+                            <div class="scanner-tab-bar">
+                                <button type="button" class="scanner-tab-btn active" id="tabModePresets"
+                                    data-i18n="tabPresets">⚡ Verified Mandi Passes</button>
+                                <button type="button" class="scanner-tab-btn" id="tabModeCamera"
+                                    data-i18n="tabCamera">📷 Live Camera</button>
+                                <button type="button" class="scanner-tab-btn" id="tabModeUpload"
+                                    data-i18n="tabUpload">📁 Upload QR File</button>
+                            </div>
+
+                            <!-- Mode A: Verified Mandi Pass Selector -->
+                            <div id="scannerPresetsSection" class="scanner-mode-panel active">
+                                <label class="gov-label" style="font-weight: 700; margin-bottom: 6px; display: block;"
+                                    data-i18n="lblSelectMandiPass">Select Incoming Mandi Transit Pass:</label>
+                                <select id="mandiPresetSelect" class="gov-select"
+                                    style="margin-bottom: 12px; font-weight: 700;">
+                                    <option value="WHT_PUNJAB">🌾 Punjab FCI Mandi — 180.00 Qtl Wheat
+                                        (EWB-PB-2026-991204)</option>
+                                    <option value="RIC_ANDHRA">🍚 AP Civil Supplies — 140.00 Qtl Boiled Rice
+                                        (EWB-AP-2026-332144)</option>
+                                    <option value="SUG_MEERUT">🍬 Daurala Sugar Complex — 110.00 Qtl Sugar
+                                        (EWB-UP-2026-554109)</option>
+                                    <option value="DAL_MAHA">🍲 NAFED Mandi Latur — 85.00 Qtl Tuvar Dal
+                                        (EWB-MH-2026-119823)</option>
+                                    <option value="WHT_HARYANA">🌾 HSWC Karnal — 160.00 Qtl Wheat (EWB-HR-2026-882311)
+                                    </option>
+                                </select>
+                                <button type="button" id="btnScanPreset" class="gov-btn secondary" style="width: 100%;"
+                                    data-i18n="btnScanPreset">
+                                    🔍 Scan &amp; Decode Selected Transit Pass
+                                </button>
+                            </div>
+
+                            <!-- Mode B: Live Camera Scanner -->
+                            <div id="scannerCameraSection" class="scanner-mode-panel" style="display: none;">
+                                <div id="cameraPreviewContainer" class="camera-stream-box">
+                                    <div id="qrCameraFeed" style="width: 100%;"></div>
+                                </div>
+                                <div class="camera-controls-row">
+                                    <button type="button" id="btnStartCamera" class="gov-btn secondary"
+                                        data-i18n="btnStartCamera">Turn On Camera</button>
+                                    <button type="button" id="btnStopCamera" class="gov-btn"
+                                        style="display: none; background: #64748B;" data-i18n="btnStopCamera">Stop
+                                        Camera</button>
+                                </div>
+                            </div>
+
+                            <!-- Mode C: File Upload Scanner -->
+                            <div id="scannerUploadSection" class="scanner-mode-panel" style="display: none;">
+                                <div class="file-dropzone" id="qrDropzone">
+                                    <span style="font-size: 32px;">📄</span>
+                                    <strong data-i18n="dropzoneTitle">Drop e-Way Bill QR Image or Click to
+                                        Browse</strong>
+                                    <small style="color: var(--text-muted);" data-i18n="dropzoneSubtext">Supports PNG,
+                                        JPG, JPEG official transit passes</small>
+                                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
+                                </div>
+                            </div>
+
+                            <!-- Decoded Consignment Verification Card (Populated upon scanning) -->
+                            <div id="decodedPassCard" class="decoded-pass-card" style="display: none;">
+                                <div class="decoded-badge-header">
+                                    <span class="mandi-verified-badge" data-i18n="ewbVerified">✅ E-WAY BILL
+                                        VERIFIED</span>
+                                    <span class="allocated-batch-tag" id="dispAllocatedBatch">ALLOCATING...</span>
+                                </div>
+                                <div class="decoded-details-grid">
+                                    <div><small>Manifest ID:</small><strong id="dispManifest">--</strong></div>
+                                    <div><small>Commodity:</small><strong id="dispCommodity">--</strong></div>
+                                    <div><small>Net Weight:</small><strong id="dispQty">--</strong></div>
+                                    <div><small>Mandi / Supplier:</small><strong id="dispSupplier">--</strong></div>
+                                    <div style="grid-column: span 2;"><small>Assigned Bay:</small><strong
+                                            id="dispLocation">--</strong></div>
+                                </div>
+                                <button type="button" id="btnConfirmDecodedIngest" class="gov-btn"
+                                    style="width: 100%; margin-top: 14px;" data-i18n="btnConfirmDecoded">
+                                    📥 Authorize Gate Inward &amp; Store Batch
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Direct Inward Manual Entry -->
+                        <div class="manual-ingest-card anim-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="directInwardTitle">Direct Inward Entry</h4>
+                                <span class="batch-preview-pill" id="formBatchPreview">Next Batch: ...</span>
+                            </div>
+                            <form id="ingestForm" class="gov-form">
+                                <div class="form-group">
+                                    <label><span data-i18n="lblEwayBillNo">e-Way Bill Number</span> <span
+                                            class="req-star">*</span></label>
+                                    <input type="text" id="manifestId" class="gov-input"
+                                        placeholder="e.g., EWB-UP-2026-982310" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label><span data-i18n="lblCommodity">Commodity</span> <span
+                                                class="req-star">*</span></label>
+                                        <select id="ingestCommodity" class="gov-select" required>
+                                            <option value="1" data-i18n="commWheat">Wheat (Grade A)</option>
+                                            <option value="2" data-i18n="commRice">Raw Rice (Boiled)</option>
+                                            <option value="3" data-i18n="commSugar">Refined Sugar</option>
+                                            <option value="4" data-i18n="commDal">Tuvar Dal</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><span data-i18n="lblWeightQtl">Weight (Quintals)</span> <span
+                                                class="req-star">*</span></label>
+                                        <input type="number" id="ingestQty" class="gov-input" placeholder="0.00"
+                                            step="0.01" min="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label><span data-i18n="lblSupplierAgency">Supplier / Mandi Agency</span> <span
+                                            class="req-star">*</span></label>
+                                    <input type="text" id="ingestSupplier" class="gov-input"
+                                        placeholder="e.g., FCI Mandi Karnal" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><span data-i18n="lblAssignedStackBay">Assigned Stack Bay</span> <span
+                                            class="req-star">*</span></label>
+                                    <input type="text" id="ingestLocation" class="gov-input"
+                                        placeholder="e.g., Shed-B / Stack-03" required>
+                                </div>
+                                <button type="submit" class="gov-btn" data-i18n="btnConfirmConsignment">Confirm
+                                    Consignment</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View 5: Challan Generator View -->
+            <div id="view-challan" class="content-view">
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <h3 data-i18n="challanGenTitle">CHALLAN GENERATOR &amp; FIFO ALLOCATION ENGINE</h3>
+                    </div>
+                    <div class="grid-2-col">
+                        <div class="dispatch-form-card anim-card">
+                            <h4 data-i18n="dispatchParamsTitle">Dispatch Requisition Parameters</h4>
+
+                            <!-- Allocation Strategy Selector -->
+                            <div class="allocation-strategy-box">
+                                <div class="strategy-header">
+                                    <span class="strategy-title" data-i18n="allocationStrategy">Allocation
+                                        Strategy</span>
+                                    <span class="status-pill active-pill" id="activeStrategyBadge">Auto-FIFO</span>
+                                </div>
+                                <div class="strategy-btn-group">
+                                    <button type="button" class="strategy-toggle-btn active" id="btnModeAuto"
+                                        onclick="switchAllocationMode('AUTO')" data-i18n="btnChronologicalFifo">
+                                        ⚡ Chronological FIFO
+                                    </button>
+                                    <button type="button" class="strategy-toggle-btn" id="btnModeManual"
+                                        onclick="switchAllocationMode('MANUAL')" data-i18n="btnManualBatchSelection">
+                                        ⚙️ Manual Batch Selection
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form id="fifoForm" class="gov-form">
+                                <div class="form-group">
+                                    <label data-i18n="lblSelectComm">Select Commodity</label>
+                                    <select id="dispatchCommodity" class="gov-select" required>
+                                        <option value="1" data-i18n="commWheat">Wheat (Grade A)</option>
+                                        <option value="2" data-i18n="commRice">Raw Rice (Boiled)</option>
+                                        <option value="3" data-i18n="commSugar">Refined Sugar</option>
+                                        <option value="4" data-i18n="commDal">Tuvar Dal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="lblDestFps">Destination FPS Outlet</label>
+                                    <select id="dispatchFps" class="gov-select" required>
+                                        <option value="1">FPS-NOD-101 (Ramesh Kumar Verma)</option>
+                                        <option value="2">FPS-GZB-204 (Sunita Devi)</option>
+                                        <option value="3">FPS-GRN-305 (Kisan Sahakari)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="lblRequiredDispatchQty">Required Dispatch Quantity
+                                        (Quintals)</label>
+                                    <input type="number" id="dispatchQty" class="gov-input" placeholder="50.00"
+                                        step="0.01" required>
+                                </div>
+
+                                <!-- Manual Batch Selection Container -->
+                                <div id="manualBatchSelectionSection" style="display: none;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <label
+                                            style="font-size: 0.85rem; font-weight: 800; color: var(--color-primary); margin: 0;"
+                                            data-i18n="lblSelectBatchToIssue">Select Inventory Batch to Issue:</label>
+                                        <small style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700;"
+                                            data-i18n="sortedByArrival">Sorted by Arrival Date</small>
+                                    </div>
+                                    <div id="manualBatchesList" class="manual-batch-panel">
+                                        <div class="placeholder-row" style="padding: 12px; font-size: 0.85rem;">Select
+                                            commodity to query available depot stacks...</div>
+                                    </div>
+                                </div>
+
+                                <button type="button" id="previewFifoBtn" class="gov-btn"
+                                    data-i18n="btnCalculateFifo">Calculate FIFO Allocation Split</button>
+                            </form>
+                        </div>
+
+                        <div class="split-preview-card anim-card">
+                            <h4 data-i18n="splitPreviewTitle">FIFO Allocation Split Preview</h4>
+                            <div id="splitPreviewContent" class="preview-empty" data-i18n="splitPreviewEmpty">
+                                Enter required grain demand and calculate the FIFO split to inspect multi-batch
+                                allocation details.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View 6: Dispatch History View -->
+            <div id="view-history" class="content-view">
+                <section class="panel-section anim-card">
+                    <div class="section-header">
+                        <h3 data-i18n="historyTitle">OUTWARD DISPATCH HISTORY &amp; AUDIT LEDGER</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="gov-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="colDeliveryChallan">Delivery Challan</th>
+                                    <th data-i18n="colDateTime">Date &amp; Time</th>
+                                    <th data-i18n="colRecipientFps">Recipient FPS</th>
+                                    <th data-i18n="colCommodity">Commodity</th>
+                                    <th data-i18n="colIssuedQty">Issued Qty (Qtl)</th>
+                                    <th data-i18n="lblAllocationMode">Allocation Mode</th>
+                                    <th data-i18n="colAuthorizedOfficer">Authorized Officer</th>
+                                    <th data-i18n="colChallanAction">Challan Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr>
+                                    <td colspan="8" class="placeholder-row">Loading historical challan records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Official Delivery Challan Modal (Export to JPG/JPEG) -->
+    <div id="challanModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div id="printableChallanCard" class="challan-document">
+                <div class="challan-header">
+                    <div class="challan-header-brand">
+                        <h2>DEPARTMENT OF FOOD &amp; PUBLIC DISTRIBUTION</h2>
+                        <p>GOVERNMENT OF INDIA • PUBLIC DISTRIBUTION DEPOT SYSTEM</p>
+                        <span class="challan-badge-official">OFFICIAL GRAIN ISSUE DELIVERY CHALLAN</span>
+                    </div>
+                    <div class="challan-header-meta">
+                        <div><strong>CHALLAN NO:</strong> <span id="modalChallanNo"
+                                class="doc-highlight">CH-00000000</span></div>
+                        <div><strong>DISPATCH DATE:</strong> <span id="modalDispatchDate">--</span></div>
+                        <div><strong>DEPOT CODE:</strong> DEPOT-GRN-04 (GREATER NOIDA)</div>
+                    </div>
+                </div>
+
+                <hr class="doc-divider">
+
+                <div class="challan-parties-grid">
+                    <div class="doc-box">
+                        <span class="box-title">CONSIGNOR (ISSUING BUFFER DEPOT)</span>
+                        <div class="box-content">
+                            <strong>Greater Noida Central Buffer Godown</strong><br>
+                            Regional Office: Meerut Division, Uttar Pradesh<br>
+                            Issuing Officer: <strong id="modalIssuer">Aryan Kumar (Godown Superintendent)</strong>
+                        </div>
+                    </div>
+
+                    <div class="doc-box">
+                        <span class="box-title">CONSIGNEE (FAIR PRICE SHOP DEALER)</span>
+                        <div class="box-content">
+                            <strong id="modalFpsTitle">FPS-NOD-101 — Ramesh Kumar Verma</strong><br>
+                            Destination: <span id="modalFpsAddress">Sector 12, Noida Central</span><br>
+                            License: UP-PDS-2026-8812
+                        </div>
+                    </div>
+                </div>
+
+                <div class="challan-commodities-wrap">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Item #</th>
+                                <th>Source Consignment Batch</th>
+                                <th>Storage Bay / Stack</th>
+                                <th>Commodity Description</th>
+                                <th>Issued Weight (Quintals)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalLineItemsBody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" style="text-align: right; font-weight: 800;">TOTAL DISPATCHED WEIGHT:
+                                </td>
+                                <td id="modalTotalQty"
+                                    style="font-weight: 900; font-family: monospace; font-size: 1.05rem;">0.00 Qtl</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="challan-footer-signatures">
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <span>Transport Driver Signature</span>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <span>Depot Superintendent Signature</span>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <span>FPS Dealer / Consignee Receipt</span>
+                    </div>
+                </div>
+
+                <div class="challan-microprint">
+                    Verification Code: PDS-SHA256-AUTHENTICATED • Electronic stock deduction verified via FIFO engine.
+                </div>
+            </div>
+
+            <div class="modal-action-bar">
+                <button id="downloadJpgBtn" class="gov-btn">📥 Download Challan (JPG)</button>
+                <button id="downloadJpegBtn" class="gov-btn secondary">🖼️ Download Challan (JPEG)</button>
+                <button id="closeModalBtn" class="gov-btn" style="background-color: #475569; border-color: #475569;">✖
+                    Close Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern GovTech Custom Modal Overlay System -->
+    <div id="govModalBackdrop" class="gov-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="gov-modal-card">
+            <div class="gov-modal-header">
+                <div class="gov-modal-icon-badge info" id="govModalIcon">
+                    ℹ️
+                </div>
+                <div class="gov-modal-title-wrap">
+                    <span class="gov-modal-category" id="govModalCategory">DEPARTMENT OF FOOD &amp; PUBLIC
+                        DISTRIBUTION</span>
+                    <h3 class="gov-modal-title" id="govModalTitle">System Notification</h3>
+                </div>
+                <button class="gov-modal-close-btn" id="govModalCloseBtn" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="gov-modal-body" id="govModalBody">
+                <!-- Modal Message Content -->
+            </div>
+            <div class="gov-modal-footer" id="govModalFooter">
+                <button type="button" class="gov-btn secondary" id="govModalCancelBtn"
+                    style="display: none;">Cancel</button>
+                <button type="button" class="gov-btn" id="govModalConfirmBtn">Acknowledge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="i18n.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

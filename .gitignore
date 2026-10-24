@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Environment variables & secrets (CRITICAL)
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# Large archives & temporary dump files
+Techtrix.zip
+*.zip
+*.tar.gz
+scratch/
+
+# Logs & debugging
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Generated exports & delivery challan images
+Delivery_Challan_*.jpg
+Delivery_Challan_*.jpeg
+Delivery_Challan_*.png
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor caches
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnnaKram</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="fps.css">
+  <script src="i18n.js"></script>
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="gov-sidebar" id="sidebar">
+      <div class="brand-box">
+        <h2 data-i18n="brandName">AnnaKram</h2>
+        <small data-i18n="fpsPortalTitle">FPS OWNER PORTAL</small>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-view="dashboard">
+          <span class="icon">📊</span> <span data-i18n="navFpsDashboard">Dashboard</span>
+        </button>
+        <button class="nav-btn" data-view="requests">
+          <span class="icon">📝</span> <span data-i18n="navFpsRequisitions">Requisitions</span>
+        </button>
+        <button class="nav-btn" data-view="inventory">
+          <span class="icon">📦</span> <span data-i18n="navFpsInventory">Shop Inventory</span>
+        </button>
+        <button class="nav-btn" data-view="returns" id="navBtnReturns">
+          <span class="icon">🔄</span> <span data-i18n="navFpsReturns">Return Stock</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <p>AnnaKram Terminal v2.4<br>Govt. of India</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-workspace">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h2 id="pageTitle" data-i18n="navFpsDashboard">Dashboard</h2>
+          <span class="sub-breadcrumb" id="fpsLicenseText" data-i18n="fpsLicenseSubtext">FPS-NOD-101 • Sector 12,
+            Noida</span>
+        </div>
+
+        <div class="header-right">
+          <!-- Language Translation Switcher Button -->
+          <div class="lang-toggle" role="group" aria-label="Language">
+            <button type="button" class="lang-btn active" id="langEn">EN</button>
+            <button type="button" class="lang-btn" id="langHi">हिन्दी</button>
+          </div>
+
+          <div class="clock-box">
+            <strong id="liveTime">00:00:00</strong>
+            <span id="liveDate">Loading...</span>
+          </div>
+
+          <!-- Profile Menu -->
+          <div class="profile-wrap" id="profileWrap">
+            <button class="profile-trigger" id="profileButton" aria-label="Open profile menu">
+              <span class="avatar-initials" id="avatarInitials">AK</span>
+            </button>
+            <div class="profile-menu" id="profileMenu">
+              <div class="profile-person">
+                <strong id="profileDisplayName">Ramesh Kumar Verma</strong>
+                <small id="profileDisplayRole" data-i18n="fpsDealer">FPS Dealer</small>
+              </div>
+              <button class="menu-item" data-i18n="settings">⚙️ Settings</button>
+              <button class="menu-item logout" id="logoutButton" data-i18n="signOut">🚪 Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-canvas">
+
+        <!-- View 1: Dashboard -->
+        <section id="view-dashboard" class="view-section active">
+
+          <!-- Live KPI Stats (Scaled Up) -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-lbl" data-i18n="kpiPendingApproval">PENDING APPROVAL</span>
+              <strong class="kpi-val text-warning" id="statPending">0</strong>
+              <span class="kpi-sub" data-i18n="kpiPendingApprovalSub">Awaiting Godown Action</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl" data-i18n="kpiFpsTransit">IN TRANSIT</span>
+              <strong class="kpi-val text-transit" id="statTransit">0</strong>
+              <span class="kpi-sub" data-i18n="kpiFpsTransitSub">Dispatched &amp; Arriving</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-lbl" data-i18n="kpiFpsDelivered">TOTAL DELIVERED</span>
+              <strong class="kpi-val text-success" id="statDelivered">0</strong>
+              <span class="kpi-sub" data-i18n="kpiFpsDeliveredSub">Successfully Received</span>
+            </div>
+          </div>
+
+          <!-- Indent Creation Form (Expanded Width) -->
+          <div class="panel form-panel">
+            <div class="panel-head">
+              <h3 data-i18n="indentTitle">Submit Stock Indent</h3>
+              <p data-i18n="indentSubtitle">Request monthly quota replenishment from Central Godown.</p>
+            </div>
+            <div class="panel-body">
+              <form id="indentForm" class="gov-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label data-i18n="lblUrgency">Urgency Level</label>
+                    <select id="urgencyLevel" class="gov-select">
+                      <option value="ROUTINE" data-i18n="optRoutineQuota">Routine Monthly Quota</option>
+                      <option value="EMERGENCY" data-i18n="optEmergencyQuota">Emergency Depletion</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label data-i18n="lblReqMonth">Requirement Month</label>
+                    <input type="month" id="reqMonth" class="gov-input" required>
+                  </div>
+                </div>
+
+                <h4 class="form-subhead" data-i18n="subheadCommodities">COMMODITY QUANTITIES (Quintals)</h4>
+                <div class="commodity-grid">
+                  <div class="comm-item">
+                    <label data-i18n="commWheat">Wheat (Grade A)</label>
+                    <input type="number" id="qty-1" class="gov-input qty-input" min="0" step="0.01" value="0">
+                  </div>
+                  <div class="comm-item">
+                    <label data-i18n="commRice">Raw Rice (Boiled)</label>
+                    <input type="number" id="qty-2" class="gov-input qty-input" min="0" step="0.01" value="0">
+                  </div>
+                  <div class="comm-item">
+                    <label data-i18n="commSugar">Refined Sugar</label>
+                    <input type="number" id="qty-3" class="gov-input qty-input" min="0" step="0.01" value="0">
+                  </div>
+                  <div class="comm-item">
+                    <label data-i18n="commDal">Tuvar Dal</label>
+                    <input type="number" id="qty-4" class="gov-input qty-input" min="0" step="0.01" value="0">
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 18px;">
+                  <label data-i18n="lblAdditionalRemarks">Additional Remarks</label>
+                  <input type="text" id="reqRemarks" class="gov-input" placeholder="Any specific requirements...">
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="gov-btn-outline" onclick="document.getElementById('indentForm').reset()"
+                    data-i18n="btnClear">Clear</button>
+                  <button type="submit" class="gov-btn-primary" id="btnSubmitIndent" data-i18n="btnSubmitIndent">Submit
+                    Requisition</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 2: Requisitions Full History -->
+        <section id="view-requests" class="view-section">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Complete Indent History</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="gov-table bold-table">
+                <thead>
+                  <tr>
+                    <th>Request Code</th>
+                    <th>Date</th>
+                    <th>Commodity</th>
+                    <th>Demanded Qty</th>
+                    <th>Urgency</th>
+                    <th>Delivery Status</th>
+                    <th>Challan / Acknowledgment</th>
+                  </tr>
+                </thead>
+                <tbody id="fullHistoryTableBody">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 3: Live Shop Inventory (Maximized & Bold) -->
+        <section id="view-inventory" class="view-section">
+          <div class="panel">
+            <div class="panel-head"
+              style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 22px;" data-i18n="shopInventoryTitle">Shop Floor Inventory (Live Sync)</h3>
+                <p style="font-size: 15px;" data-i18n="shopInventorySubtitle">Real-time physical stock calculated
+                  automatically from delivered consignments minus returns.</p>
+              </div>
+              <button class="gov-btn-primary" style="padding: 10px 20px; font-size: 15px; background: #C2410C;"
+                onclick="navigateToReturnView()" data-i18n="btnReturnLeftoverTop">
+                🔄 Return Leftover Stock to Godown
+              </button>
+            </div>
+            <div class="panel-body">
+              <table class="gov-table inventory-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="colCommodityType">Commodity Type</th>
+                    <th style="text-align: right;" data-i18n="colAvailableNet">Available Quantity (Net On-Floor)</th>
+                    <th style="text-align: center; width: 220px;" data-i18n="colReverseLogistics">Reverse Logistics
+                      Action</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                  <tr>
+                    <td colspan="3" class="empty-state">Syncing live inventory...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 4: Return Leftover Stock to Central Godown (Reverse Logistics) -->
+        <section id="view-returns" class="view-section">
+          <!-- Return Form Panel -->
+          <div class="panel form-panel">
+            <div class="panel-head"
+              style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 data-i18n="returnStockTitle">Reverse Logistics: Return Leftover Stock</h3>
+                <p data-i18n="returnStockSubtitle">Dispatch unutilized monthly quota, excess buffer, or aging stock back
+                  to Central Warehousing Godown.</p>
+              </div>
+              <span class="status-badge bg-transit"
+                style="font-size: 13px; font-weight: 800; border: 1px solid var(--secondary);"
+                data-i18n="badgeRgp">REVERSE GATE PASS (RGP)</span>
+            </div>
+            <div class="panel-body">
+              <form id="returnStockForm" class="gov-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="returnCommoditySelect"><span data-i18n="lblSelectReturnComm">Select Commodity to
+                        Return</span> <span style="color: #DC2626;">*</span></label>
+                    <select id="returnCommoditySelect" class="gov-select" required
+                      onchange="handleReturnCommodityChange()">
+                      <option value="" data-i18n="chooseCommPrompt">-- Choose Commodity Available on Floor --</option>
+                      <option value="1" data-i18n="commWheat">Wheat (Grade A)</option>
+                      <option value="2" data-i18n="commRice">Raw Rice (Boiled)</option>
+                      <option value="3" data-i18n="commSugar">Refined Sugar</option>
+                      <option value="4" data-i18n="commDal">Tuvar Dal</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="returnQtyInput"><span data-i18n="lblReturnQty">Return Quantity (Quintals)</span> <span
+                        style="color: #DC2626;">*</span></label>
+                    <input type="number" id="returnQtyInput" class="gov-input" min="0.01" step="0.01" placeholder="0.00"
+                      required oninput="updateReturnSummary()">
+                    <small id="availableStockHint"
+                      style="font-size: 13px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">Available on
+                      floor: 0.00 Qtl</small>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="returnReasonSelect"><span data-i18n="lblReturnReason">Statutory Reason for Return</span>
+                      <span style="color: #DC2626;">*</span></label>
+                    <select id="returnReasonSelect" class="gov-select" required>
+                      <option value="END_OF_MONTH_SURPLUS" data-i18n="optMonthSurplus">End-of-Month Unutilized Quota
+                        Surplus</option>
+                      <option value="QUALITY_DEGRADATION_MOISTURE" data-i18n="optMoistureDamage">Moisture / Quality
+                        Degradation (Lab Testing)</option>
+                      <option value="SHOP_RENOVATION_TEMPORARY" data-i18n="optDepotRenovation">Depot Maintenance / Space
+                        Reallocation</option>
+                      <option value="ALLOTMENT_ADJUSTMENT" data-i18n="optQuotaAdjustment">Administrative Quota
+                        Re-alignment</option>
+                      <option value="DAMAGED_BAGS_INSPECTION" data-i18n="optDamagedBags">Transit Damage / Bag Tearing
+                        (Gate Inspection)</option>
+                      <option value="OTHER" data-i18n="optOtherReason">Other Operational Rationale (Specify in remarks)
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="returnVehicleInput" data-i18n="lblVehicleCarrier">Transport Vehicle / Carrier
+                      Details</label>
+                    <input type="text" id="returnVehicleInput" class="gov-input"
+                      placeholder="e.g., UP-16-BT-9104 (FCI Depot Carrier)">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="returnTargetBay" data-i18n="lblReceivingBay">Receiving Godown Bay</label>
+                    <input type="text" id="returnTargetBay" class="gov-input"
+                      value="Central Warehousing Godown — Return Bay R-01" readonly
+                      style="background: #F1F5F9; color: var(--text-muted);">
+                  </div>
+                  <div class="form-group">
+                    <label for="returnRemarksInput" data-i18n="lblDealerRemarks">Dealer Manifest Remarks</label>
+                    <input type="text" id="returnRemarksInput" class="gov-input"
+                      placeholder="Optional notes for Godown Superintendent...">
+                  </div>
+                </div>
+
+                <!-- Live Return Calculation Preview Card -->
+                <div id="returnCalculationCard" class="return-calc-card" style="display: none;">
+                  <div class="calc-row">
+                    <span data-i18n="calcCurrShopStock">Current Available Shop Stock:</span>
+                    <strong id="calcCurrentStock">0.00 Qtl</strong>
+                  </div>
+                  <div class="calc-row" style="color: #DC2626;">
+                    <span data-i18n="calcReturningToGodown">Returning to Central Godown:</span>
+                    <strong id="calcReturningQty">- 0.00 Qtl</strong>
+                  </div>
+                  <div class="calc-row calc-balance">
+                    <span data-i18n="calcNetShopBalance">Net Balance Remaining in Shop:</span>
+                    <strong id="calcRemainingStock" style="color: var(--primary);">0.00 Qtl</strong>
+                  </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 10px;">
+                  <button type="button" class="gov-btn-outline" onclick="resetReturnForm()"
+                    data-i18n="btnClear">Reset</button>
+                  <button type="submit" class="gov-btn-primary" id="btnSubmitReturn" style="background-color: #C2410C;"
+                    data-i18n="btnSubmitReturnPass">🔄 Transmit Return &amp; Generate Gate Pass</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Return History Ledger Panel -->
+          <div class="panel">
+            <div class="panel-head" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 data-i18n="returnsLedgerTitle">Reverse Consignment &amp; Return Gate Pass Ledger</h3>
+                <p data-i18n="returnsLedgerSubtitle">Complete historical audit log of all stock returned to the Central
+                  Godown.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="gov-table bold-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="colGatePass">Gate Pass (RGP)</th>
+                    <th data-i18n="colDateTime">Date &amp; Time</th>
+                    <th data-i18n="colCommodityType">Commodity</th>
+                    <th data-i18n="lblReturnQty">Returned Qty</th>
+                    <th data-i18n="colReturnReason">Reason Code</th>
+                    <th data-i18n="colGodownStatus">Godown Status</th>
+                    <th data-i18n="colChallanAction">Challan Action</th>
+                  </tr>
+                </thead>
+                <tbody id="returnsHistoryTableBody">
+                  <tr>
+                    <td colspan="7" class="empty-state">No stock return consignments logged yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="i18n.js"></script>
+  <script src="fps.js"></script>
+</body>
+
+</html>

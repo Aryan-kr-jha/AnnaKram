@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Background GovTech Gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3368A0" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+
+    <!-- Golden Grain Gradient -->
+    <linearGradient id="grainGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="40%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Secondary Accent Ring Gradient -->
+    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C8DFDB" />
+      <stop offset="100%" stop-color="#66A3BF" />
+    </linearGradient>
+
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base Container -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bgGradient)" stroke="url(#ringGradient)" stroke-width="2" />
+
+  <!-- Outer Authority Crest Ring -->
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#66A3BF" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.6"/>
+
+  <!-- Stylized Wheat Stalk & Sequential Order (AnnaKram) -->
+  <g filter="url(#subtleShadow)">
+    <!-- Central Stalk Stem -->
+    <path d="M32 49 C32 40, 32 25, 32 15" fill="none" stroke="#FDE68A" stroke-width="2.2" stroke-linecap="round"/>
+
+    <!-- Grains Left -->
+    <path d="M32 42 C27 41, 23 37, 25 33 C28 33, 31 38, 32 42 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+    <path d="M32 34 C26 33, 22 28, 24 24 C28 24, 31 30, 32 34 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+    <path d="M32 26 C27 25, 23 20, 25 17 C28 17, 31 22, 32 26 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+
+    <!-- Grains Right -->
+    <path d="M32 42 C37 41, 41 37, 39 33 C36 33, 33 38, 32 42 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+    <path d="M32 34 C38 33, 42 28, 40 24 C36 24, 33 30, 32 34 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+    <path d="M32 26 C37 25, 41 20, 39 17 C36 17, 33 22, 32 26 Z" fill="url(#grainGold)" stroke="#D97706" stroke-width="0.6"/>
+
+    <!-- Apex Top Grain Tip -->
+    <path d="M32 15 C30 11, 32 8, 32 8 C32 8, 34 11, 32 15 Z" fill="#FDE68A" stroke="#D97706" stroke-width="0.6"/>
+  </g>
+
+  <!-- FIFO Chronological Flow Indicator Arrows (Kram / Order) -->
+  <path d="M14 36 C13 32, 14 26, 17 21" fill="none" stroke="#C8DFDB" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M15 21 L17 21 L17 23" fill="none" stroke="#C8DFDB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M50 28 C51 32, 50 38, 47 43" fill="none" stroke="#C8DFDB" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M49 43 L47 43 L47 41" fill="none" stroke="#C8DFDB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

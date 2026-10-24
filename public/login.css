@@ -1,0 +1,761 @@
+/* ==========================================================================
+   PALETTE DEFINITIONS (Strict Project Priority Order):
+   1. #3368A0 (Primary Brand Blue — Authority, Bar, Submit, Active States)
+   2. #66A3BF (Secondary Slate Blue — Accents, Borders, Hover Accents)
+   3. #C8DFDB (Soft Sage Ice — Tints, Sub-panels, Chip Surfaces)
+   4. #F2EFE7 (Warm Canvas Parchment — Body Background, Crisp Card Face)
+   5. #1E293B (Deep Navy Slate — High-Contrast Authoritative Text)
+
+   LAYOUT: sliding two-panel card (form half + curved colour panel),
+   modelled on the "Modern Login" reference project.
+   ========================================================================== */
+
+:root {
+  --primary-blue: #3368A0;
+  --secondary-slate: #66A3BF;
+  --surface-ice: #C8DFDB;
+  --canvas-parchment: #F2EFE7;
+  --text-dark: #1E293B;
+  --text-muted: #52657E;
+  --white: #FFFFFF;
+
+  --border-strong: #3368A0;
+  --border-mid: #66A3BF;
+  --border-light: #B4D1CB;
+
+  --shadow-card: 0 5px 15px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 14px 28px -4px rgba(30, 41, 59, 0.2);
+  --focus-ring: 0 0 0 3px rgba(51, 104, 160, 0.28);
+  --font-main: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", "Helvetica Neue", Arial, sans-serif;
+  --slide-time: 0.6s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--white);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input { font-family: inherit; }
+
+/* Accent strip at very top */
+.top-strip {
+  display: flex;
+  height: 5px;
+}
+.top-strip span { flex: 1; }
+.top-strip span:nth-child(1) { background-color: var(--surface-ice); }
+.top-strip span:nth-child(2) { background-color: var(--canvas-parchment); }
+.top-strip span:nth-child(3) { background-color: var(--secondary-slate); }
+
+/* ==========================================================================
+   1. HEADER / BRANDING BAR
+   ========================================================================== */
+.gov-header {
+  background-color: var(--primary-blue);
+  padding: 12px 28px;
+  border-bottom: 3px solid var(--secondary-slate);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-emblem {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: var(--canvas-parchment);
+  border: 2px solid var(--surface-ice);
+  color: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.dept-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--surface-ice);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1px;
+}
+
+.portal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: 0.3px;
+}
+
+.portal-sub {
+  font-size: 12px;
+  color: #E2E8F0;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lang-toggle {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.18);
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: #E2E8F0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--surface-ice); }
+
+.lang-btn.active {
+  background-color: var(--white);
+  color: var(--primary-blue);
+}
+
+.security-pill {
+  background-color: var(--text-dark);
+  border: 1px solid var(--secondary-slate);
+  color: var(--surface-ice);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   2. MAIN SLIDING CARD  (reference: .container)
+   ========================================================================== */
+.login-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.container {
+  background-color: var(--white);
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(30, 41, 59, 0.22), 0 2px 8px rgba(30, 41, 59, 0.12);
+  position: relative;
+  overflow: hidden;
+  width: 900px;
+  max-width: 100%;
+}
+
+/* Form half — sits in normal flow so its height sizes the card */
+.form-panel {
+  width: 50%;
+  padding: 28px 36px;
+  background-color: var(--white);
+  position: relative;
+  z-index: 2;
+  transition: transform var(--slide-time) ease-in-out;
+}
+
+.container.active .form-panel {
+  transform: translateX(100%);
+}
+
+/* ---- Toggle (curved colour panel) ---- */
+.toggle-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform var(--slide-time) ease-in-out, border-radius var(--slide-time) ease-in-out;
+  border-radius: 150px 0 0 100px;
+  z-index: 1000;
+}
+
+.container.active .toggle-container {
+  transform: translateX(-100%);
+  border-radius: 0 150px 100px 0;
+}
+
+.toggle {
+  background-color: var(--primary-blue);
+  background: linear-gradient(to right, var(--secondary-slate), var(--primary-blue));
+  color: var(--white);
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform var(--slide-time) ease-in-out;
+}
+
+.container.active .toggle {
+  transform: translateX(50%);
+}
+
+.toggle-panel {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 34px;
+  text-align: center;
+  transform: translateX(0);
+  transition: transform var(--slide-time) ease-in-out;
+}
+
+.toggle-panel h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.toggle-panel p {
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0.3px;
+  margin: 18px 0 20px;
+  font-weight: 500;
+}
+
+.toggle-left { transform: translateX(-200%); }
+.container.active .toggle-left { transform: translateX(0); }
+
+.toggle-right { right: 0; transform: translateX(0); }
+.container.active .toggle-right { transform: translateX(200%); }
+
+.ghost-btn {
+  background-color: transparent;
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 10px 45px;
+  border: 1px solid var(--white);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.ghost-btn:hover {
+  background-color: var(--white);
+  color: var(--primary-blue);
+}
+
+.ghost-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--surface-ice); }
+
+/* ==========================================================================
+   FORM-PANEL CONTENT
+   ========================================================================== */
+
+/* Card Hero */
+.card-hero {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.hero-icon-wrap {
+  display: inline-flex;
+  padding: 9px;
+  border-radius: 50%;
+  background-color: var(--surface-ice);
+  color: var(--primary-blue);
+  margin-bottom: 6px;
+  border: 2px solid var(--secondary-slate);
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary-blue);
+  margin-bottom: 2px;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Tabs: Sign In / Sign Up (toggle pills) */
+.tab-switch-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--surface-ice);
+  padding: 4px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-mid);
+  box-shadow: inset 0 1px 3px rgba(30, 41, 59, 0.15);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-btn:hover:not(.active) { background-color: rgba(255, 255, 255, 0.55); }
+.tab-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.tab-btn.active {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  box-shadow: 0 2px 6px rgba(30, 41, 59, 0.3);
+}
+
+/* Role Selector */
+.role-section {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+  letter-spacing: 0.4px;
+}
+
+.form-group .form-label,
+.label-row .form-label { margin-bottom: 0; }
+
+.req-star {
+  color: #DC2626;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.role-card {
+  position: relative;
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--border-light);
+  background-color: var(--canvas-parchment);
+  color: var(--text-dark);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.role-card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-1px);
+}
+
+.role-card:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.role-card.active {
+  border-color: var(--primary-blue);
+  background-color: var(--surface-ice);
+  color: var(--primary-blue);
+  box-shadow: 0 2px 6px rgba(51, 104, 160, 0.25);
+}
+
+/* Tick badge on the selected role */
+.role-card.active::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--primary-blue);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12 10 17 19 7'/%3E%3C/svg%3E");
+  background-position: center;
+  background-size: 10px 10px;
+  background-repeat: no-repeat;
+}
+
+.role-card.active svg { color: var(--primary-blue); }
+
+.role-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.role-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Quick Demo Fill Bar (card bottom, low emphasis) */
+.demo-box {
+  background-color: var(--canvas-parchment);
+  border: 1px dashed var(--border-mid);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dark);
+}
+
+.demo-lbl {
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10.5px;
+}
+
+.demo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-btn {
+  background-color: var(--white);
+  color: var(--text-dark);
+  border: 1px solid var(--border-mid);
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.chip-btn:hover { background-color: var(--surface-ice); }
+.chip-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.chip-btn.active {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  border-color: var(--primary-blue);
+}
+
+/* Alert Boxes */
+.alert {
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.alert.error {
+  background-color: #FEE2E2;
+  border: 1.5px solid #FCA5A5;
+  color: #DC2626;
+}
+
+.alert.success {
+  background-color: #D1FAE5;
+  border: 1.5px solid #6EE7B7;
+  color: #065F46;
+}
+
+/* Form Styles */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-size: 12px;
+  color: var(--primary-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.forgot-link:hover { text-decoration: underline; }
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Filled, borderless fields like the reference (parchment fill) */
+.gov-input {
+  width: 100%;
+  padding: 11px 15px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-color: var(--canvas-parchment);
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.gov-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.gov-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  background-color: var(--white);
+  box-shadow: var(--focus-ring);
+}
+
+.gov-input.pass-input { padding-right: 42px; }
+.gov-input.text-upper { text-transform: uppercase; }
+
+.eye-toggle {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--secondary-slate);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.eye-toggle:hover { color: var(--primary-blue); }
+.eye-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Eye / eye-off icon swap (class toggled from JS) */
+.eye-toggle .eye-slash { display: none; }
+.eye-toggle.is-visible .eye-slash { display: block; }
+.eye-toggle.is-visible { color: var(--primary-blue); }
+
+/* Submit CTA (reference button style: small caps, 8px radius) */
+.submit-btn {
+  width: 100%;
+  font-size: 12.5px;
+  padding: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  background-color: var(--primary-blue);
+  color: var(--white);
+  border: 1px solid var(--primary-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 4px;
+}
+
+.submit-btn:hover {
+  background-color: #27527E;
+  border-color: #27527E;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.submit-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Bottom Switcher */
+.bottom-switch-row {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.switch-link {
+  color: var(--primary-blue);
+  font-weight: 800;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.switch-link:hover { text-decoration: underline; }
+
+/* ==========================================================================
+   4. RESPONSIVE
+   Narrow screens: the sliding colour panel is hidden and the card becomes a
+   single column; the Sign In / Sign Up pills + bottom link handle switching.
+   ========================================================================== */
+@media (max-width: 760px) {
+  .container { width: 100%; max-width: 480px; border-radius: 20px; }
+  .form-panel { width: 100%; padding: 24px 20px; }
+  .container.active .form-panel { transform: none; }
+  .toggle-container { display: none; }
+}
+
+@media (max-width: 560px) {
+  .gov-header { padding: 10px 16px; }
+  .header-right { width: 100%; justify-content: space-between; }
+  .demo-box { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ==========================================================================
+   MODERN CUSTOM GOVTECH MODAL POPUP SYSTEM (LOGIN)
+   ========================================================================== */
+.gov-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.gov-modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gov-modal-card {
+  background-color: var(--white);
+  border: 2.5px solid var(--primary-blue);
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+  max-width: 520px;
+  width: 100%;
+  overflow: hidden;
+  transform: scale(0.92) translateY(8px);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-modal-backdrop.active .gov-modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.gov-modal-header {
+  padding: 16px 20px;
+  background-color: var(--sage);
+  border-bottom: 2px solid var(--secondary-slate);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+
+.gov-modal-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.gov-modal-icon-badge.info { background-color: #DBEAFE; color: var(--primary-blue); border: 2px solid var(--primary-blue); }
+.gov-modal-icon-badge.success { background-color: #DCFCE7; color: #166534; border: 2px solid #16A34A; }
+.gov-modal-icon-badge.warning { background-color: #FEF3C7; color: #92400E; border: 2px solid #D97706; }
+.gov-modal-icon-badge.error { background-color: #FEE2E2; color: #991B1B; border: 2px solid #DC2626; }
+.gov-modal-icon-badge.confirm { background-color: #E0E7FF; color: #3730A3; border: 2px solid #4F46E5; }
+
+.gov-modal-title-wrap { flex: 1; min-width: 0; }
+.gov-modal-category { display: block; font-size: 0.72rem; font-weight: 800; color: var(--primary-blue); letter-spacing: 0.8px; text-transform: uppercase; }
+.gov-modal-title { font-size: 1.15rem; font-weight: 800; color: var(--navy-text); line-height: 1.3; margin-top: 1px; }
+
+.gov-modal-close-btn { background: transparent; border: none; font-size: 1.5rem; line-height: 1; color: #64748B; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+.gov-modal-close-btn:hover { background-color: rgba(30, 41, 59, 0.1); color: var(--navy-text); }
+
+.gov-modal-body { padding: 22px 24px; font-size: 0.95rem; font-weight: 600; color: var(--navy-text); line-height: 1.55; background-color: var(--canvas-parchment); max-height: 60vh; overflow-y: auto; word-break: break-word; }
+.gov-modal-footer { padding: 14px 20px; background-color: var(--white); border-top: 1.5px solid #CBD5E1; display: flex; justify-content: flex-end; gap: 12px; }
+.gov-modal-footer button { padding: 10px 18px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; cursor: pointer; border: 2px solid transparent; background: var(--primary-blue); color: var(--white); min-width: 100px; }
