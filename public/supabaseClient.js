@@ -29,10 +29,13 @@
     }
 
     try {
-      // Direct config check: if running on static/Live Server (e.g. port 3002, 5500), target Express port 9765
-      const configUrl = (window.location && window.location.port === '9765')
-        ? '/api/auth/config'
-        : 'http://localhost:9765/api/auth/config';
+      // Direct config check: if running on separate local dev port (e.g. port 3002, 5500), target Express port 9765
+      const isLocalDevServer = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && 
+        window.location.port !== '9765';
+      const configUrl = isLocalDevServer
+        ? 'http://localhost:9765/api/auth/config'
+        : '/api/auth/config';
 
       const res = await fetch(configUrl, { cache: 'no-store' });
       if (res.ok) {

@@ -1,5 +1,7 @@
 // public/dashboard.js - Live Central Godown Dashboard Controller
-const API_BASE = 'http://localhost:9765/api';
+const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '9765')
+  ? 'http://localhost:9765/api'
+  : '/api';
 
 /* ==========================================================================
    DYNAMIC STATE: LIVE DATABASE SYNCHRONIZATION

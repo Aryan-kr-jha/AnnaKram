@@ -73,6 +73,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(publicPath, 'login.html'));
 });
 
+// Favicon fallback for browser default requests to prevent 404
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(publicPath, 'favicon.svg'));
+});
+
 // Public Auth Configuration Endpoint for Frontend Vanilla JS Client
 app.get('/api/auth/config', (req, res) => {
   res.status(200).json({
