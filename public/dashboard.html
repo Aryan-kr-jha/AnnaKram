@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- html5-qrcode library for camera & image QR scanning -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- jsQR robust canvas-based QR decoder fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <!-- AnnaKram Central Translation Engine -->
     <script src="i18n.js"></script>
 </head>
@@ -394,12 +396,11 @@
 
                             <!-- Mode C: File Upload Scanner -->
                             <div id="scannerUploadSection" class="scanner-mode-panel" style="display: none;">
-                                <div class="file-dropzone" id="qrDropzone">
-                                    <span style="font-size: 32px;"></span>
-                                    <strong data-i18n="dropzoneTitle">Drop e-Way Bill QR Image or Click to
-                                        Browse</strong>
-                                    <small style="color: var(--text-muted);" data-i18n="dropzoneSubtext">Supports PNG,
-                                        JPG, JPEG official transit passes</small>
+                                <div class="file-dropzone" id="qrDropzone" role="button" tabindex="0" aria-label="Upload QR code image">
+                                    <span style="font-size: 38px; display: block; margin-bottom: 6px;">📷</span>
+                                    <strong data-i18n="dropzoneTitle">Drop e-Way Bill QR Image or Click to Browse</strong>
+                                    <small style="color: var(--text-muted); display: block; margin-top: 4px;" data-i18n="dropzoneSubtext">Supports PNG, JPG, JPEG official transit passes (Auto-detects e-Way bills)</small>
+                                    <div id="qrScanStatus" style="display: none; margin-top: 10px; font-weight: 800; font-size: 13px; color: var(--color-primary);"></div>
                                     <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
                                 </div>
                             </div>

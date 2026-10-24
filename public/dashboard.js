@@ -364,7 +364,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     initUI();
     refreshAllDashboardData();
     initModalActions();
+
+    // Real-time stock update listeners across tabs and windows
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'annakram_stock_update_trigger' || (e.key && e.key.includes('batch')) || (e.key && e.key.includes('godown'))) {
+            refreshAllDashboardData();
+        }
+    });
+
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const channel = new BroadcastChannel('annakram_inventory_channel');
+            channel.onmessage = () => {
+                refreshAllDashboardData();
+            };
+        } catch (e) {
+            console.warn('[SYNC] BroadcastChannel not supported:', e);
+        }
+    }
+
+    window.addEventListener('focus', () => refreshAllDashboardData());
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshAllDashboardData();
+    });
+
+    // Auto-refresh poll every 8 seconds to guarantee Central Dashboard is always synchronized with FPS returns
+    setInterval(() => {
+        refreshAllDashboardData();
+    }, 8000);
 });
+
 /* Helper to refresh all live data from DB simultaneously */
 async function refreshAllDashboardData() {
   await Promise.all([
@@ -555,23 +584,76 @@ async function fetchKPIs() {
 }
 
 // Fetch Batches & Update Stacks Table + Radar (Account Isolated)
+// Fetch Batches & Update Stacks Table + Radar (Account Isolated + Global Returns Sync)
 async function fetchInventory(commodityId = 'ALL') {
     try {
         const localBatches = (typeof window.getAccountData === 'function')
             ? window.getAccountData('godown_batches', [])
             : [];
+        let globalBatches = [];
+        try {
+            globalBatches = JSON.parse(localStorage.getItem('annakram_global_godown_batches') || '[]');
+        } catch (e) {}
 
         const base = commodityId === 'ALL' ? `${API_BASE}/batches` : `${API_BASE}/batches?commodity_id=${commodityId}`;
         const url = `${base}${base.includes('?') ? '&' : '?'}t=${Date.now()}`;
         const res = await fetch(url, { cache: 'no-store' });
         const data = await res.json();
 
-        let allBatches = [...localBatches];
+        let allBatches = [];
+        const seenBatchNos = new Set();
+
         if (data.success && Array.isArray(data.batches)) {
-            const localBatchNos = new Set(localBatches.map(b => b.batch_number));
             data.batches.forEach(b => {
-                if (!localBatchNos.has(b.batch_number)) allBatches.push(b);
+                if (b && b.batch_number && !seenBatchNos.has(b.batch_number)) {
+                    seenBatchNos.add(b.batch_number);
+                    allBatches.push(b);
+                }
             });
+        }
+
+        // Include any locally generated or returned batches
+        [...globalBatches, ...localBatches].forEach(b => {
+            if (b && b.batch_number && !seenBatchNos.has(b.batch_number)) {
+                seenBatchNos.add(b.batch_number);
+                allBatches.push(b);
+            }
+        });
+
+        // Calculate accurate days_in_storage and ensure commodity_name is never undefined
+        allBatches.forEach(b => {
+            if (!b.commodity_name) {
+                const cid = Number(b.commodity_id);
+                if (cid === 1) b.commodity_name = 'Wheat (Grade A)';
+                else if (cid === 2) b.commodity_name = 'Raw Rice (Boiled)';
+                else if (cid === 3) b.commodity_name = 'Refined Sugar';
+                else if (cid === 4) b.commodity_name = 'Tuvar Dal';
+                else b.commodity_name = 'Standard Grain';
+            }
+            if (b.days_in_storage === undefined || b.days_in_storage === null || Number.isNaN(Number(b.days_in_storage))) {
+                if (b.receipt_date) {
+                    const rDate = new Date(b.receipt_date);
+                    const now = new Date();
+                    const diffTime = Math.max(0, now - rDate);
+                    b.days_in_storage = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                } else {
+                    b.days_in_storage = 0;
+                }
+            } else {
+                b.days_in_storage = Math.max(0, parseInt(b.days_in_storage, 10) || 0);
+            }
+        });
+
+        // Re-sync KPI tiles if active batch sum is greater than KPI tile
+        const totalBufferCalculated = allBatches.reduce((acc, b) => acc + (b.status === 'AVAILABLE' ? Number(b.remaining_qty || 0) : 0), 0);
+        const kpiTotalElem = document.getElementById('kpiTotalStock');
+        if (kpiTotalElem && totalBufferCalculated > 0) {
+            kpiTotalElem.textContent = totalBufferCalculated.toFixed(2);
+        }
+
+        const kpiIncomingElem = document.getElementById('kpiIncomingStock');
+        if (kpiIncomingElem && allBatches.length > 0) {
+            kpiIncomingElem.textContent = allBatches.filter(b => b.status === 'AVAILABLE' && Number(b.remaining_qty) > 0).length;
         }
 
         if (commodityId !== 'ALL') {
@@ -596,24 +678,29 @@ function renderInventoryTable(batches) {
         return;
     }
 
-    tbody.innerHTML = batches.map(b => `
-    <tr>
-      <td><strong>${b.batch_number}</strong></td>
-      <td>${getDisplayCommodityName(b.commodity_name)}</td>
-      <td>${b.supplier_name}</td>
-      <td>${new Date(b.receipt_date).toLocaleDateString()}</td>
-      <td><strong class="${b.days_in_storage > 60 ? 'urgent-text' : ''}">${b.days_in_storage} ${(typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'दिन' : 'Days'}</strong></td>
-      <td>${renderAgingGradeBadge(b.days_in_storage)}</td>
-      <td><span class="stack-badge">${b.stack_location}</span></td>
-      <td><strong class="qty-highlight">${Number(b.remaining_qty).toFixed(2)}</strong></td>
-      <td><span class="status-pill active-pill">${b.status}</span></td>
-      <td>
-        <button class="gov-btn-sm" onclick="toggleBatchStatus(${b.id}, '${b.status}')">
-          ${b.status === 'AVAILABLE' ? ((typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'क्वारंटीन' : 'Quarantine') : ((typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'रिलीज़' : 'Release')}
-        </button>
-      </td>
-    </tr>
-  `).join('');
+    tbody.innerHTML = batches.map(b => {
+        const days = (b.days_in_storage !== undefined && b.days_in_storage !== null && !Number.isNaN(Number(b.days_in_storage)))
+            ? Number(b.days_in_storage)
+            : 0;
+        return `
+        <tr>
+          <td><strong>${b.batch_number}</strong></td>
+          <td>${getDisplayCommodityName(b.commodity_name)}</td>
+          <td>${b.supplier_name || 'Standard Mandi Hub'}</td>
+          <td>${b.receipt_date ? new Date(b.receipt_date).toLocaleDateString() : new Date().toLocaleDateString()}</td>
+          <td><strong class="${days > 60 ? 'urgent-text' : ''}">${days} ${(typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'दिन' : 'Days'}</strong></td>
+          <td>${renderAgingGradeBadge(days)}</td>
+          <td><span class="stack-badge">${b.stack_location || 'Bay-01'}</span></td>
+          <td><strong class="qty-highlight">${Number(b.remaining_qty || 0).toFixed(2)}</strong></td>
+          <td><span class="status-pill active-pill">${b.status || 'AVAILABLE'}</span></td>
+          <td>
+            <button class="gov-btn-sm" onclick="toggleBatchStatus(${b.id}, '${b.status}')">
+              ${b.status === 'AVAILABLE' ? ((typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'क्वारंटीन' : 'Quarantine') : ((typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi') ? 'रिलीज़' : 'Release')}
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
 }
 
 // Render FIFO Priority Evacuation Radar (Oldest First)
@@ -623,7 +710,7 @@ function renderEvacuationRadar(batches) {
 
     const sorted = [...batches]
         .filter(b => b.status === 'AVAILABLE')
-        .sort((a, b) => b.days_in_storage - a.days_in_storage)
+        .sort((a, b) => (Number(b.days_in_storage) || 0) - (Number(a.days_in_storage) || 0))
         .slice(0, 3);
 
     if (sorted.length === 0) {
@@ -632,21 +719,26 @@ function renderEvacuationRadar(batches) {
     }
 
     const isHi = (typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'hi');
-    radarTbody.innerHTML = sorted.map((b, idx) => `
-    <tr class="${idx === 0 ? 'highlight-row' : ''}">
-      <td><strong>${b.batch_number}</strong></td>
-      <td>${getDisplayCommodityName(b.commodity_name)}</td>
-      <td><span class="stack-badge">${b.stack_location}</span></td>
-      <td><strong class="${b.days_in_storage > 60 ? 'urgent-text' : ''}">${b.days_in_storage} ${isHi ? 'दिन पुराना' : 'Days Old'}</strong></td>
-      <td>${renderAgingGradeBadge(b.days_in_storage)}</td>
-      <td><strong class="qty-highlight">${Number(b.remaining_qty).toFixed(2)} ${isHi ? 'क्विंटल' : 'Qtl'}</strong></td>
-      <td>
-        <span class="action-tag ${idx === 0 ? 'priority' : ''}">
-          ${idx === 0 ? (isHi ? 'तत्काल निकासी' : 'Immediate Outward') : (isHi ? 'कतार में अगला' : 'Next In Line')}
-        </span>
-      </td>
-    </tr>
-  `).join('');
+    radarTbody.innerHTML = sorted.map((b, idx) => {
+        const days = (b.days_in_storage !== undefined && b.days_in_storage !== null && !Number.isNaN(Number(b.days_in_storage)))
+            ? Number(b.days_in_storage)
+            : 0;
+        return `
+        <tr class="${idx === 0 ? 'highlight-row' : ''}">
+          <td><strong>${b.batch_number}</strong></td>
+          <td>${getDisplayCommodityName(b.commodity_name)}</td>
+          <td><span class="stack-badge">${b.stack_location || 'Bay-01'}</span></td>
+          <td><strong class="${days > 60 ? 'urgent-text' : ''}">${days} ${isHi ? 'दिन पुराना' : 'Days Old'}</strong></td>
+          <td>${renderAgingGradeBadge(days)}</td>
+          <td><strong class="qty-highlight">${Number(b.remaining_qty || 0).toFixed(2)} ${isHi ? 'क्विंटल' : 'Qtl'}</strong></td>
+          <td>
+            <span class="action-tag ${idx === 0 ? 'priority' : ''}">
+              ${idx === 0 ? (isHi ? 'तत्काल निकासी' : 'Immediate Outward') : (isHi ? 'कतार में अगला' : 'Next In Line')}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
 }
 
 // Render Commodity Reserves Breakdown (Full Width)
@@ -940,12 +1032,41 @@ function initTransitPassScanner() {
     if (btnStartCam) btnStartCam.addEventListener('click', startCameraScanner);
     if (btnStopCam) btnStopCam.addEventListener('click', stopCameraScanner);
 
-    // File Upload Scanner
+    // File Upload Scanner with Drag-and-Drop and Click-to-Browse
     const dropzone = document.getElementById('qrDropzone');
     const fileInput = document.getElementById('qrFileInput');
     if (dropzone && fileInput) {
-        dropzone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleQrFileUpload);
+        dropzone.addEventListener('click', (e) => {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        });
+        fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.style.borderColor = 'var(--color-primary)';
+            dropzone.style.background = '#EFF6FF';
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.style.borderColor = '';
+            dropzone.style.background = '';
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.borderColor = '';
+            dropzone.style.background = '';
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleSingleQrFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleSingleQrFile(e.target.files[0]);
+            }
+            fileInput.value = '';
+        });
     }
 }
 
@@ -1054,13 +1175,13 @@ async function startCameraScanner() {
 
         await html5QrScannerInstance.start(
             { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
+            { fps: 12, qrbox: { width: 260, height: 260 } },
             (decodedText) => {
                 parseAndProcessQrText(decodedText);
                 stopCameraScanner();
             },
             (error) => {
-                // Ignore frame-by-frame non-matches
+                // Ignore non-matches during video frames
             }
         );
 
@@ -1086,44 +1207,263 @@ async function stopCameraScanner() {
     if (btnStop) btnStop.style.display = 'none';
 }
 
-async function handleQrFileUpload(e) {
-    const file = e.target.files && e.target.files[0];
+// Multi-engine image QR reader: BarcodeDetector -> jsQR Canvas -> Html5Qrcode
+async function decodeQrFromImageFile(file) {
+    // Engine 1: Native BarcodeDetector (Modern Chrome, Edge, Android)
+    if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        try {
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
+            const bitmap = await createImageBitmap(file);
+            const codes = await detector.detect(bitmap);
+            if (codes && codes.length > 0 && codes[0].rawValue) {
+                console.log('[QR ENGINE] Decoded via Native BarcodeDetector');
+                return codes[0].rawValue;
+            }
+        } catch (e) {
+            console.warn('[QR ENGINE] BarcodeDetector fallback:', e);
+        }
+    }
+
+    // Engine 2: jsQR with Canvas Multi-Scale Analysis
+    try {
+        const text = await scanWithJsQr(file);
+        if (text) {
+            console.log('[QR ENGINE] Decoded via jsQR');
+            return text;
+        }
+    } catch (e) {
+        console.warn('[QR ENGINE] jsQR fallback:', e);
+    }
+
+    // Engine 3: Html5Qrcode In-Memory (showImage = false)
+    if (typeof Html5Qrcode !== 'undefined') {
+        try {
+            let tempHolder = document.getElementById('qrMemoryDecoderHolder');
+            if (!tempHolder) {
+                tempHolder = document.createElement('div');
+                tempHolder.id = 'qrMemoryDecoderHolder';
+                tempHolder.style.display = 'none';
+                document.body.appendChild(tempHolder);
+            }
+            const scanner = new Html5Qrcode('qrMemoryDecoderHolder');
+            const result = await scanner.scanFile(file, false);
+            scanner.clear();
+            if (result) {
+                console.log('[QR ENGINE] Decoded via Html5Qrcode');
+                return result;
+            }
+        } catch (e) {
+            console.warn('[QR ENGINE] Html5Qrcode fallback:', e);
+        }
+    }
+
+    return null;
+}
+
+function scanWithJsQr(file) {
+    return new Promise((resolve) => {
+        if (typeof jsQR === 'undefined') {
+            resolve(null);
+            return;
+        }
+
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            try {
+                let width = img.naturalWidth || img.width;
+                let height = img.naturalHeight || img.height;
+                const maxDim = 1200;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const imgData = ctx.getImageData(0, 0, width, height);
+                const code = jsQR(imgData.data, imgData.width, imgData.height, {
+                    inversionAttempts: 'attemptBoth'
+                });
+
+                if (code && code.data) {
+                    resolve(code.data);
+                    return;
+                }
+
+                // If high resolution, try 650px downsampled canvas
+                if (width > 650) {
+                    const canvasSmall = document.createElement('canvas');
+                    const sw = 650;
+                    const sh = Math.round((height * 650) / width);
+                    canvasSmall.width = sw;
+                    canvasSmall.height = sh;
+                    const ctxSmall = canvasSmall.getContext('2d', { willReadFrequently: true });
+                    ctxSmall.drawImage(img, 0, 0, sw, sh);
+                    const imgDataSmall = ctxSmall.getImageData(0, 0, sw, sh);
+                    const codeSmall = jsQR(imgDataSmall.data, imgDataSmall.width, imgDataSmall.height, {
+                        inversionAttempts: 'attemptBoth'
+                    });
+                    if (codeSmall && codeSmall.data) {
+                        resolve(codeSmall.data);
+                        return;
+                    }
+                }
+
+                resolve(null);
+            } catch (err) {
+                resolve(null);
+            }
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(null);
+        };
+        img.src = url;
+    });
+}
+
+async function handleSingleQrFile(file) {
     if (!file) return;
 
-    if (typeof Html5Qrcode === 'undefined') {
-        showGovAlert('Scanner library is initializing. Please try again.', 'Notice', 'info');
-        return;
+    const statusElem = document.getElementById('qrScanStatus');
+    if (statusElem) {
+        statusElem.style.display = 'block';
+        statusElem.textContent = '⏳ Scanning and decoding QR code image...';
     }
 
     try {
-        const scanner = new Html5Qrcode('qrCameraFeed');
-        const decodedText = await scanner.scanFile(file, true);
-        parseAndProcessQrText(decodedText);
-        scanner.clear();
+        const decodedText = await decodeQrFromImageFile(file);
+        if (decodedText) {
+            parseAndProcessQrText(decodedText);
+            if (statusElem) {
+                statusElem.textContent = '✅ QR Code successfully decoded!';
+                setTimeout(() => { statusElem.style.display = 'none'; }, 3000);
+            }
+        } else {
+            if (statusElem) statusElem.style.display = 'none';
+            showGovAlert('Could not detect a valid QR code in this image. Please ensure the QR image is well-lit and not blurry, or select a Verified Mandi Pass.', 'QR Code Not Found', 'warning');
+        }
     } catch (err) {
-        // Fallback: If image cannot be read as QR, pick matching Mandi pass
-        const randomKey = Object.keys(MANDI_PRESETS)[Math.floor(Math.random() * Object.keys(MANDI_PRESETS).length)];
-        displayDecodedTransitPass(MANDI_PRESETS[randomKey]);
+        if (statusElem) statusElem.style.display = 'none';
+        console.error('[QR] File decode error:', err);
+        showGovAlert('An error occurred while reading the image file. Please try another image.', 'Scan Error', 'error');
     }
 }
 
 function parseAndProcessQrText(text) {
-    try {
-        const json = JSON.parse(text);
-        displayDecodedTransitPass({
-            manifest_id: json.manifest_id || json.ewbNo || `EWB-SCAN-${Date.now().toString().slice(-6)}`,
-            commodity_id: Number(json.commodity_id || 1),
-            commodity_name: json.commodity_name || json.commodity || 'Wheat (Grade A)',
-            initial_qty: Number(json.initial_qty || json.qty || 150),
-            supplier_name: json.supplier_name || json.supplier || 'Government Mandi Agency',
-            stack_location: json.stack_location || 'Shed-A / Stack-01',
-            receipt_date: json.receipt_date || new Date().toISOString().split('T')[0]
-        });
-    } catch (e) {
-        // Structured text format: EWB-PB-991204
-        const pass = MANDI_PRESETS['WHT_PUNJAB'];
-        displayDecodedTransitPass(pass);
+    if (!text || typeof text !== 'string') return;
+    text = text.trim();
+
+    let manifest_id = '';
+    let commodity_id = 1;
+    let commodity_name = 'Wheat (Grade A)';
+    let initial_qty = 150.00;
+    let supplier_name = 'Government Mandi Agency';
+    let stack_location = 'Godown Bay A - Row 1';
+    let receipt_date = new Date().toISOString().split('T')[0];
+
+    function resolveCommodity(str, hsn) {
+        const lower = String(str || '').toLowerCase();
+        const hsnStr = String(hsn || '');
+
+        if (hsnStr.startsWith('1006') || lower.includes('rice') || lower.includes('चावल')) {
+            return { id: 2, name: 'Raw Rice (Boiled)', location: 'Godown Bay B - Row 2' };
+        }
+        if (hsnStr.startsWith('1701') || lower.includes('sugar') || lower.includes('चीनी')) {
+            return { id: 3, name: 'Refined Sugar', location: 'Godown Bay C - Row 1' };
+        }
+        if (hsnStr.startsWith('0713') || lower.includes('dal') || lower.includes('pulse') || lower.includes('tuvar') || lower.includes('दाल')) {
+            return { id: 4, name: 'Tuvar Dal', location: 'Godown Bay D - Row 4' };
+        }
+        return { id: 1, name: 'Wheat (Grade A)', location: 'Godown Bay A - Row 1' };
     }
+
+    let isJson = false;
+    try {
+        if (text.startsWith('{') && text.endsWith('}')) {
+            const json = JSON.parse(text);
+            isJson = true;
+
+            manifest_id = json.manifest_id || json.ewbNo || json.ewb_no || json.docNo || json.EwbNo || json.billNo || '';
+            const commInfo = resolveCommodity(
+                json.commodity_name || json.commodity || json.itemDesc || json.itemName || '',
+                json.mainHsnCode || json.hsnCode || json.hsn || ''
+            );
+            commodity_id = json.commodity_id ? Number(json.commodity_id) : commInfo.id;
+            commodity_name = json.commodity_name || commInfo.name;
+            stack_location = json.stack_location || commInfo.location;
+
+            const parsedQty = parseFloat(json.initial_qty || json.quantity || json.qty || json.totQty || json.weight);
+            if (!Number.isNaN(parsedQty) && parsedQty > 0) {
+                initial_qty = parsedQty;
+            }
+
+            supplier_name = json.supplier_name || json.supplier || json.fromTrdName || json.fromPlace || json.fromGstin || 'Government Mandi Agency';
+            if (json.receipt_date) receipt_date = json.receipt_date;
+            else if (json.ewbDt) {
+                const parts = String(json.ewbDt).split(' ')[0].split(/[\/-]/);
+                if (parts.length === 3) {
+                    receipt_date = parts[0].length === 4 ? `${parts[0]}-${parts[1]}-${parts[2]}` : `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+        }
+    } catch (e) {}
+
+    if (!isJson) {
+        const ewbMatch = text.match(/(?:EWB|E-Way|Bill|No|Number)[\s:=-]+([A-Z0-9-]+)/i) || text.match(/\b\d{12}\b/);
+        if (ewbMatch) {
+            manifest_id = ewbMatch[1] || ewbMatch[0];
+            if (!manifest_id.toUpperCase().startsWith('EWB')) {
+                manifest_id = `EWB-${manifest_id}`;
+            }
+        }
+
+        const qtyMatch = text.match(/(?:Qty|Quantity|Weight|Net)[\s:=-]+(\d+(?:\.\d+)?)/i) || text.match(/(\d+(?:\.\d+)?)\s*(?:Qtl|Quintal|Ton|MT|KG)/i);
+        if (qtyMatch) {
+            initial_qty = parseFloat(qtyMatch[1]);
+        }
+
+        const supMatch = text.match(/(?:From|Supplier|Mandi|Agency|Trader)[\s:=-]+([^\n\r,;|]+)/i);
+        if (supMatch) {
+            supplier_name = supMatch[1].trim();
+        }
+
+        const commInfo = resolveCommodity(text, '');
+        commodity_id = commInfo.id;
+        commodity_name = commInfo.name;
+        stack_location = commInfo.location;
+    }
+
+    if (!manifest_id) {
+        manifest_id = `EWB-SCAN-${Date.now().toString().slice(-6)}`;
+    }
+
+    displayDecodedTransitPass({
+        manifest_id,
+        commodity_id,
+        commodity_name,
+        initial_qty,
+        supplier_name,
+        stack_location,
+        receipt_date
+    });
+
+    showGovAlert(
+        `e-Way Bill QR Code Scanned & Decoded Successfully!<br><br><strong>e-Way Bill No:</strong> ${manifest_id}<br><strong>Commodity:</strong> ${commodity_name}<br><strong>Quantity:</strong> ${initial_qty.toFixed(2)} Qtl<br><strong>Supplier:</strong> ${supplier_name}`,
+        'Transit Pass Verified',
+        'success'
+    );
 }
 
 window.toggleBatchStatus = async function (batchId, currentStatus) {
@@ -1245,6 +1585,10 @@ function renderManualBatchesList() {
     container.innerHTML = availableCommodityBatches.map(b => {
         const isOldest = b.id === oldestBatch.id;
         const isSelected = b.id === selectedManualBatchId;
+        const bDays = (b.days_in_storage !== undefined && b.days_in_storage !== null && !Number.isNaN(Number(b.days_in_storage)))
+            ? Number(b.days_in_storage)
+            : (b.receipt_date ? Math.max(0, Math.floor((new Date() - new Date(b.receipt_date)) / (1000 * 60 * 60 * 24))) : 0);
+        b.days_in_storage = bDays;
 
         return `
             <div class="manual-batch-item ${isSelected ? 'selected' : ''}" onclick="selectManualBatch(${b.id})">
@@ -1257,11 +1601,11 @@ function renderManualBatchesList() {
                                 ? '<span class="fifo-oldest-badge">⭐ Oldest Eligible (FIFO)</span>' 
                                 : '<span class="fifo-oldest-badge" style="background-color: #E2E8F0; color: #475569; border-color: #CBD5E1;">Newer Consignment</span>'}
                         </strong>
-                        <small>Bay: ${b.stack_location} • Inward: ${new Date(b.receipt_date).toLocaleDateString()} (${b.days_in_storage} days in storage)</small>
+                        <small>Bay: ${b.stack_location} • Inward: ${b.receipt_date ? new Date(b.receipt_date).toLocaleDateString() : 'N/A'} (${bDays} days in storage)</small>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    ${renderAgingGradeBadge(b.days_in_storage)}
+                    ${renderAgingGradeBadge(bDays)}
                     <strong class="qty-highlight">${Number(b.remaining_qty).toFixed(2)} Qtl</strong>
                 </div>
             </div>
@@ -1280,7 +1624,7 @@ window.selectManualBatch = async function (batchId) {
     const chosenBatch = availableCommodityBatches.find(b => b.id === batchId) || oldestBatch;
 
     const skipsOlder = oldestBatch && chosenBatch.id !== oldestBatch.id && 
-        (new Date(chosenBatch.receipt_date) > new Date(oldestBatch.receipt_date) || chosenBatch.days_in_storage < oldestBatch.days_in_storage);
+        (new Date(chosenBatch.receipt_date) > new Date(oldestBatch.receipt_date) || Number(chosenBatch.days_in_storage || 0) < Number(oldestBatch.days_in_storage || 0));
 
     if (skipsOlder) {
         await triggerFIFOOverrideModal(chosenBatch, oldestBatch);
@@ -1299,11 +1643,13 @@ window.selectManualBatch = async function (batchId) {
 };
 
 window.triggerFIFOOverrideModal = async function (chosenBatch, oldestBatch) {
+    const oldestDays = Number(oldestBatch ? oldestBatch.days_in_storage : 0) || 0;
+    const chosenDays = Number(chosenBatch ? chosenBatch.days_in_storage : 0) || 0;
     const overrideFormHtml = `
       <div style="font-size: 13px; line-height: 1.5; color: #1E293B; margin-bottom: 8px;">
-        An older eligible FIFO batch (<strong style="color: #92400E;">${oldestBatch ? oldestBatch.batch_number : 'Older Batch'}</strong> — inward: ${oldestBatch ? new Date(oldestBatch.receipt_date).toLocaleDateString() : 'N/A'}, stored for <strong>${oldestBatch ? oldestBatch.days_in_storage : 0} days</strong>) is currently available (${oldestBatch ? Number(oldestBatch.remaining_qty).toFixed(2) : 0} Qtl balance).
+        An older eligible FIFO batch (<strong style="color: #92400E;">${oldestBatch ? oldestBatch.batch_number : 'Older Batch'}</strong> — inward: ${oldestBatch && oldestBatch.receipt_date ? new Date(oldestBatch.receipt_date).toLocaleDateString() : 'N/A'}, stored for <strong>${oldestDays} days</strong>) is currently available (${oldestBatch ? Number(oldestBatch.remaining_qty).toFixed(2) : 0} Qtl balance).
         <br>
-        You are selecting newer consignment <strong>${chosenBatch.batch_number}</strong> (${chosenBatch.days_in_storage} days in storage).
+        You are selecting newer consignment <strong>${chosenBatch.batch_number}</strong> (${chosenDays} days in storage).
       </div>
       <div id="fifoOverrideFormContainer" style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px;">
         <div style="background: #FEF2F2; border: 1px solid #FCA5A5; padding: 12px; border-radius: 6px;">

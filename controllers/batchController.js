@@ -151,12 +151,20 @@ exports.ingestBatch = async (req, res, next) => {
       initialStatus
     ];
 
-    const result = await db.query(insertQuery, values);
+    const insertedBatch = result.rows[0];
+    // Attach commodity name and storage age
+    try {
+      const commRes = await db.query('SELECT name FROM commodities WHERE id = $1', [insertedBatch.commodity_id]);
+      insertedBatch.commodity_name = commRes.rows[0]?.name || 'Standard Grain';
+    } catch (e) {
+      insertedBatch.commodity_name = 'Standard Grain';
+    }
+    insertedBatch.days_in_storage = 0;
 
     return res.status(201).json({
       success: true,
       message: 'Consignment successfully ingested into stock batches.',
-      batch: result.rows[0]
+      batch: insertedBatch
     });
   } catch (error) {
     // Detect duplicate manifest scan via PostgreSQL unique constraint code '23505'
@@ -312,8 +320,9 @@ exports.returnStockToGodown = async (req, res, next) => {
         initial_qty, 
         remaining_qty, 
         stack_location, 
-        status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $6, $7, $8)
+        status,
+        ingestion_source
+      ) VALUES ($1, $2, $3, $4, $5, $6, $6, $7, $8, 'FPS_REVERSE_LOGISTICS')
       RETURNING *;
     `;
 
@@ -330,11 +339,23 @@ exports.returnStockToGodown = async (req, res, next) => {
 
     const result = await db.query(insertQuery, values);
 
+    // Fetch commodity details so batch payload and returned object has commodity_name
+    const commRes = await db.query('SELECT name, unit FROM commodities WHERE id = $1', [parsedCommodityId]);
+    const commodityName = commRes.rows[0]?.name || 'Wheat (Grade A)';
+    const commodityUnit = commRes.rows[0]?.unit || 'Quintals';
+
+    const fullBatch = {
+      ...result.rows[0],
+      commodity_name: commodityName,
+      unit: commodityUnit,
+      days_in_storage: 0
+    };
+
     return res.status(201).json({
       success: true,
       message: 'Leftover stock accepted and logged into Central Godown inventory.',
       return_challan_no: returnChallanNo,
-      batch: result.rows[0],
+      batch: fullBatch,
       returned_qty: parsedQty,
       return_reason: return_reason || 'END_OF_MONTH_SURPLUS',
       return_date: new Date().toISOString()

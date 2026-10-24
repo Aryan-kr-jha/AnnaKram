@@ -721,14 +721,17 @@ window.handleReturnStockSubmission = async function(e) {
   let gatePassNo = `RGP-${commId === 1 ? 'WHT' : commId === 2 ? 'RIC' : commId === 3 ? 'SUG' : 'DAL'}-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
   let allocatedBatchNo = `B-RET-${Date.now().toString().slice(-6)}`;
 
+  const resolvedFpsCode = (typeof currentFpsEntity === 'string' ? currentFpsEntity : currentFpsEntity?.fps_code) || 'FPS-NOD-101';
+  const resolvedDealer = (typeof currentFpsEntity === 'object' && currentFpsEntity?.dealer_name) || currentUser?.name || 'Ramesh Kumar Verma';
+
   try {
     const res = await fetch(`${API_BASE}/batches/return`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fps_id: Number(currentFpsId) || 1,
-        fps_code: currentFpsEntity?.fps_code || 'FPS-NOD-101',
-        dealer_name: currentFpsEntity?.dealer_name || 'Ramesh Kumar Verma',
+        fps_code: resolvedFpsCode,
+        dealer_name: resolvedDealer,
         commodity_id: commId,
         returned_qty: qty,
         return_reason: reason,
@@ -743,8 +746,23 @@ window.handleReturnStockSubmission = async function(e) {
       allocatedBatchNo = data.batch?.batch_number || allocatedBatchNo;
     }
   } catch (err) {
-    console.info('[SYNC] Inward return recorded in account-isolated storage:', err.message);
+    console.info('[SYNC] Inward return recorded in storage sync:', err.message);
   }
+
+  const newReturnBatch = {
+    id: Date.now(),
+    batch_number: allocatedBatchNo,
+    external_manifest_id: gatePassNo,
+    commodity_id: commId,
+    commodity_name: commName,
+    supplier_name: `FPS Return: ${resolvedDealer} (${resolvedFpsCode})`,
+    receipt_date: new Date().toISOString().split('T')[0],
+    initial_qty: qty,
+    remaining_qty: qty,
+    days_in_storage: 0,
+    stack_location: 'Bay-Return / Shed-R',
+    status: 'AVAILABLE'
+  };
 
   // Save to account-isolated returns ledger
   if (typeof window.getAccountData === 'function') {
@@ -766,21 +784,25 @@ window.handleReturnStockSubmission = async function(e) {
 
     // Also mirror to godown batches so if godown is inspected under same account it is present
     const godownBatches = window.getAccountData('godown_batches', []);
-    godownBatches.unshift({
-      id: Date.now(),
-      batch_number: allocatedBatchNo,
-      external_manifest_id: gatePassNo,
-      commodity_id: commId,
-      commodity_name: commName,
-      supplier_name: `FPS Return: ${currentFpsEntity?.dealer_name || 'Ramesh Kumar Verma'} (${currentFpsEntity?.fps_code || 'FPS-NOD-101'})`,
-      receipt_date: new Date().toISOString().split('T')[0],
-      initial_qty: qty,
-      remaining_qty: qty,
-      days_in_storage: 0,
-      stack_location: 'Bay-Return / Shed-R',
-      status: 'AVAILABLE'
-    });
+    godownBatches.unshift(newReturnBatch);
     window.saveAccountData('godown_batches', godownBatches);
+  }
+
+  // Global shared storage across all accounts and Central Dashboard
+  try {
+    const globalBatches = JSON.parse(localStorage.getItem('annakram_global_godown_batches') || '[]');
+    globalBatches.unshift(newReturnBatch);
+    localStorage.setItem('annakram_global_godown_batches', JSON.stringify(globalBatches));
+
+    // Real-time notification trigger for Central Dashboard in other tabs/windows
+    localStorage.setItem('annakram_stock_update_trigger', Date.now().toString());
+    if (typeof BroadcastChannel !== 'undefined') {
+      const bc = new BroadcastChannel('annakram_inventory_channel');
+      bc.postMessage({ type: 'STOCK_RETURNED', commodity_id: commId, qty: qty, time: Date.now() });
+      bc.close();
+    }
+  } catch (e) {
+    console.warn('[BROADCAST] Error signaling stock return:', e);
   }
 
   // Re-sync physical inventory and history tables
