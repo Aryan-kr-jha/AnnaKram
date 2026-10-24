@@ -1,6 +1,7 @@
 // server.js - Application Entry Point for AnnaKram iPDS Portal
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const { closePool } = require('./db');
@@ -17,7 +18,7 @@ const PORT = parseInt(process.env.PORT || '9765', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Initialize Supabase Backend Client (for token verification)
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ehqztjogzwevtugixynv.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 let supabaseServerClient = null;
@@ -63,8 +64,14 @@ const optionalSupabaseAuth = async (req, res, next) => {
 
 app.use(optionalSupabaseAuth);
 
-// Serve frontend static files from 'public' directory
-app.use(express.static('public'));
+// Serve frontend static files from 'public' directory using absolute pathing for Render compatibility
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
+
+// Default Root Route -> Serve login.html directly when visiting the base Render URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(publicPath, 'login.html'));
+});
 
 // Public Auth Configuration Endpoint for Frontend Vanilla JS Client
 app.get('/api/auth/config', (req, res) => {
@@ -117,8 +124,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start HTTP Server
-const server = app.listen(PORT, () => {
+// Start HTTP Server bound to 0.0.0.0 for cloud container hosting (Render/Railway)
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`=========================================`);
   console.log(` AnnaKram iPDS FIFO Stock Management Server `);
   console.log(` Port: ${PORT} | Environment: ${NODE_ENV}  `);
