@@ -57,6 +57,10 @@
                 </svg>
 
                 <div class="dropdown-menu" id="profileMenu">
+                    <div class="profile-menu-user" style="padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                        <strong class="profile-menu-name" id="menuProfileName" style="display: block; font-size: 14px; font-weight: 700; color: #1E293B;">Aryan Kumar</strong>
+                        <small class="profile-menu-email" id="menuProfileEmail" style="display: block; color: #64748B; font-size: 11px;">officer@ipds.gov.in</small>
+                    </div>
                     <a href="#" class="dropdown-item" data-i18n="profileOverview">Profile Overview</a>
                     <hr class="dropdown-divider">
                     <a href="#" class="dropdown-item logout" data-i18n="signOut">Sign Out</a>
@@ -343,11 +347,11 @@
                             <!-- Scanner Mode Switcher -->
                             <div class="scanner-tab-bar">
                                 <button type="button" class="scanner-tab-btn active" id="tabModePresets"
-                                    data-i18n="tabPresets">⚡ Verified Mandi Passes</button>
-                                <button type="button" class="scanner-tab-btn" id="tabModeCamera"
-                                    data-i18n="tabCamera">📷 Live Camera</button>
-                                <button type="button" class="scanner-tab-btn" id="tabModeUpload"
-                                    data-i18n="tabUpload">📁 Upload QR File</button>
+                                    data-i18n="tabPresets"> Verified Mandi Passes</button>
+                                <button type="button" class="scanner-tab-btn" id="tabModeCamera" data-i18n="tabCamera">
+                                    Live Camera</button>
+                                <button type="button" class="scanner-tab-btn" id="tabModeUpload" data-i18n="tabUpload">
+                                    Upload QR File</button>
                             </div>
 
                             <!-- Mode A: Verified Mandi Pass Selector -->
@@ -356,15 +360,15 @@
                                     data-i18n="lblSelectMandiPass">Select Incoming Mandi Transit Pass:</label>
                                 <select id="mandiPresetSelect" class="gov-select"
                                     style="margin-bottom: 12px; font-weight: 700;">
-                                    <option value="WHT_PUNJAB">🌾 Punjab FCI Mandi — 180.00 Qtl Wheat
+                                    <option value="WHT_PUNJAB"> Punjab FCI Mandi — 180.00 Qtl Wheat
                                         (EWB-PB-2026-991204)</option>
-                                    <option value="RIC_ANDHRA">🍚 AP Civil Supplies — 140.00 Qtl Boiled Rice
+                                    <option value="RIC_ANDHRA"> AP Civil Supplies — 140.00 Qtl Boiled Rice
                                         (EWB-AP-2026-332144)</option>
-                                    <option value="SUG_MEERUT">🍬 Daurala Sugar Complex — 110.00 Qtl Sugar
+                                    <option value="SUG_MEERUT"> Daurala Sugar Complex — 110.00 Qtl Sugar
                                         (EWB-UP-2026-554109)</option>
-                                    <option value="DAL_MAHA">🍲 NAFED Mandi Latur — 85.00 Qtl Tuvar Dal
+                                    <option value="DAL_MAHA"> NAFED Mandi Latur — 85.00 Qtl Tuvar Dal
                                         (EWB-MH-2026-119823)</option>
-                                    <option value="WHT_HARYANA">🌾 HSWC Karnal — 160.00 Qtl Wheat (EWB-HR-2026-882311)
+                                    <option value="WHT_HARYANA"> HSWC Karnal — 160.00 Qtl Wheat (EWB-HR-2026-882311)
                                     </option>
                                 </select>
                                 <button type="button" id="btnScanPreset" class="gov-btn secondary" style="width: 100%;"
@@ -390,7 +394,7 @@
                             <!-- Mode C: File Upload Scanner -->
                             <div id="scannerUploadSection" class="scanner-mode-panel" style="display: none;">
                                 <div class="file-dropzone" id="qrDropzone">
-                                    <span style="font-size: 32px;">📄</span>
+                                    <span style="font-size: 32px;"></span>
                                     <strong data-i18n="dropzoneTitle">Drop e-Way Bill QR Image or Click to
                                         Browse</strong>
                                     <small style="color: var(--text-muted);" data-i18n="dropzoneSubtext">Supports PNG,
@@ -402,8 +406,7 @@
                             <!-- Decoded Consignment Verification Card (Populated upon scanning) -->
                             <div id="decodedPassCard" class="decoded-pass-card" style="display: none;">
                                 <div class="decoded-badge-header">
-                                    <span class="mandi-verified-badge" data-i18n="ewbVerified">✅ E-WAY BILL
-                                        VERIFIED</span>
+                                    <span class="mandi-verified-badge" data-i18n="ewbVerified">E-WAY BILL VERIFIED</span>
                                     <span class="allocated-batch-tag" id="dispAllocatedBatch">ALLOCATING...</span>
                                 </div>
                                 <div class="decoded-details-grid">
@@ -677,8 +680,8 @@
             </div>
 
             <div class="modal-action-bar">
-                <button id="downloadJpgBtn" class="gov-btn">📥 Download Challan (JPG)</button>
-                <button id="downloadJpegBtn" class="gov-btn secondary">🖼️ Download Challan (JPEG)</button>
+                <button id="downloadJpgBtn" class="gov-btn"> Download Challan (JPG)</button>
+                <button id="downloadJpegBtn" class="gov-btn secondary"> Download Challan (JPEG)</button>
                 <button id="closeModalBtn" class="gov-btn" style="background-color: #475569; border-color: #475569;">✖
                     Close Preview</button>
             </div>

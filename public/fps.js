@@ -201,8 +201,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   currentFpsId = resolveFpsId(currentUser);
   currentFpsEntity = currentUser?.entity_id || `FPS-NOD-10${currentFpsId}`;
 
-  document.getElementById('profileDisplayName').textContent = currentUser?.name || 'Ramesh Kumar Verma';
-  document.getElementById('avatarInitials').textContent = (currentUser?.name || 'RK').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  const fpsName = currentUser?.name || 'Ramesh Kumar Verma';
+  const fpsEmail = currentUser?.email || 'dealer@ipds.gov.in';
+
+  if (document.getElementById('profileDisplayName')) {
+    document.getElementById('profileDisplayName').textContent = fpsName;
+  }
+  if (document.getElementById('profileDisplayEmail')) {
+    document.getElementById('profileDisplayEmail').textContent = fpsEmail;
+  }
+  if (document.getElementById('avatarInitials')) {
+    document.getElementById('avatarInitials').textContent = fpsName.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
   document.getElementById('fpsLicenseText').textContent = `${currentFpsEntity} • Reg: UP West`;
 
   initUI(sb);

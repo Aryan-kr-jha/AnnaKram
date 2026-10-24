@@ -474,6 +474,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         sessionUser.token = sessionUser.token || ('local_token_' + Date.now());
+        // Save to persistent profile for subsequent logins
+        try {
+          localStorage.setItem('annakram_user_profile_' + email, JSON.stringify(sessionUser));
+        } catch (e) {}
         sessionStorage.setItem('ipds_auth_user', JSON.stringify(sessionUser));
         sessionStorage.setItem('ipds_auth_token', sessionUser.token);
         showSuccess(t.registered);
@@ -498,6 +502,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let sessionUser = null;
         let targetRole = role;
 
+        // Retrieve any previously saved profile name for this email from registration
+        let savedProfile = null;
+        try {
+          const raw = localStorage.getItem('annakram_user_profile_' + email);
+          if (raw) savedProfile = JSON.parse(raw);
+        } catch (e) {}
+
+        const resolveName = (metaName, fallbackRole) => {
+          if (savedProfile?.name) return savedProfile.name;
+          if (metaName) return metaName;
+          const emailParts = email.split('@')[0].split(/[._-]/).filter(Boolean);
+          if (emailParts.length > 0) {
+            return emailParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+          }
+          return fallbackRole === 'Godown Manager' ? 'Aryan Kumar' : 'Ramesh Kumar Verma';
+        };
+
         const isPlaceholderKey = Boolean(window.SUPABASE_CONFIG?.isPlaceholder);
 
         if (supabase && !isPlaceholderKey) {
@@ -515,13 +536,13 @@ document.addEventListener('DOMContentLoaded', () => {
               if (isInvalidKey || isDemo) {
                 console.warn('[AUTH FALLBACK] Remote auth bypassed (' + error.message + '). Activating local session.');
                 authSuccess = true;
-                targetRole = (role || (email.includes('fps') ? 'FPS Owner' : 'Godown Manager'));
+                targetRole = (savedProfile?.role || role || (email.includes('fps') ? 'FPS Owner' : 'Godown Manager'));
                 sessionUser = {
-                  name: targetRole === 'Godown Manager' ? 'Aryan Kumar' : 'Ramesh Kumar Verma',
+                  name: resolveName(null, targetRole),
                   email: email,
                   role: targetRole,
-                  entity_id: targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101',
-                  fps_id: targetRole === 'FPS Owner' ? 1 : null,
+                  entity_id: savedProfile?.entity_id || (targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101'),
+                  fps_id: targetRole === 'FPS Owner' ? (savedProfile?.fps_id || 1) : null,
                   token: 'local_token_' + Date.now(),
                   loginTime: new Date().toLocaleTimeString()
                 };
@@ -531,13 +552,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (data?.user) {
               authSuccess = true;
               const meta = data.user.user_metadata || {};
-              targetRole = meta.role || role;
+              targetRole = meta.role || savedProfile?.role || role;
               sessionUser = {
-                name: meta.name || (targetRole === 'Godown Manager' ? 'Aryan Kumar' : 'Ramesh Kumar Verma'),
+                name: resolveName(meta.name, targetRole),
                 email: data.user.email,
                 role: targetRole,
-                entity_id: meta.entity_id || (targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101'),
-                fps_id: meta.fps_id || (targetRole === 'FPS Owner' ? 1 : null),
+                entity_id: meta.entity_id || savedProfile?.entity_id || (targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101'),
+                fps_id: meta.fps_id || savedProfile?.fps_id || (targetRole === 'FPS Owner' ? 1 : null),
                 token: data.session?.access_token || '',
                 loginTime: new Date().toLocaleTimeString()
               };
@@ -552,13 +573,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isInvalidKey) {
               console.warn('[AUTH FALLBACK] Remote auth notice (' + sbErr.message + '). Activating local session.');
               authSuccess = true;
-              targetRole = role || (email.includes('fps') ? 'FPS Owner' : 'Godown Manager');
+              targetRole = savedProfile?.role || role || (email.includes('fps') ? 'FPS Owner' : 'Godown Manager');
               sessionUser = {
-                name: targetRole === 'Godown Manager' ? 'Aryan Kumar' : 'Ramesh Kumar Verma',
+                name: resolveName(null, targetRole),
                 email: email,
                 role: targetRole,
-                entity_id: targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101',
-                fps_id: targetRole === 'FPS Owner' ? 1 : null,
+                entity_id: savedProfile?.entity_id || (targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101'),
+                fps_id: targetRole === 'FPS Owner' ? (savedProfile?.fps_id || 1) : null,
                 token: 'local_token_' + Date.now(),
                 loginTime: new Date().toLocaleTimeString()
               };
@@ -569,12 +590,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           // Placeholder or unconfigured Supabase key: smoothly activate verified local session
           authSuccess = true;
+          targetRole = savedProfile?.role || role;
           sessionUser = {
-            name: role === 'Godown Manager' ? 'Aryan Kumar' : 'Ramesh Kumar Verma',
+            name: resolveName(null, targetRole),
             email: email,
-            role: role,
-            entity_id: role === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101',
-            fps_id: role === 'FPS Owner' ? 1 : null,
+            role: targetRole,
+            entity_id: savedProfile?.entity_id || (targetRole === 'Godown Manager' ? 'GDN-GRN-04' : 'FPS-NOD-101'),
+            fps_id: targetRole === 'FPS Owner' ? (savedProfile?.fps_id || 1) : null,
             token: 'local_token_' + Date.now(),
             loginTime: new Date().toLocaleTimeString()
           };
@@ -582,6 +604,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (authSuccess && sessionUser) {
           sessionUser.token = sessionUser.token || ('local_token_' + Date.now());
+          try {
+            localStorage.setItem('annakram_user_profile_' + email, JSON.stringify(sessionUser));
+          } catch (e) {}
           sessionStorage.setItem('ipds_auth_user', JSON.stringify(sessionUser));
           sessionStorage.setItem('ipds_auth_token', sessionUser.token);
           showSuccess(t.redirecting);

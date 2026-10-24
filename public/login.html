@@ -133,22 +133,13 @@
         <!-- Authentication Form -->
         <form id="authForm" class="auth-form" autocomplete="off">
 
-          <!-- Sign Up Dynamic Fields: Full Name & Entity ID -->
+          <!-- Sign Up Dynamic Field: Full Name (Placed directly above Email ID, Sign Up only) -->
           <div class="form-group signup-only" id="grpFullName" style="display: none;">
             <label for="userName" class="form-label">
               <span id="lblFullName">Full Name</span> <span class="req-star">*</span>
             </label>
             <div class="input-wrap">
               <input type="text" id="userName" class="gov-input" placeholder="e.g. Aryan Kumar Jha">
-            </div>
-          </div>
-
-          <div class="form-group signup-only" id="grpEntityId" style="display: none;">
-            <label for="entityId" class="form-label">
-              <span id="lblEntityId">Godown Depot Code</span> <span class="req-star">*</span>
-            </label>
-            <div class="input-wrap">
-              <input type="text" id="entityId" class="gov-input text-upper" placeholder="e.g. GDN-GRN-04">
             </div>
           </div>
 
@@ -159,6 +150,16 @@
             </label>
             <div class="input-wrap">
               <input type="email" id="userEmail" class="gov-input" placeholder="officer@ipds.gov.in" required>
+            </div>
+          </div>
+
+          <!-- Sign Up Dynamic Field: Depot / License Code -->
+          <div class="form-group signup-only" id="grpEntityId" style="display: none;">
+            <label for="entityId" class="form-label">
+              <span id="lblEntityId">Godown Depot Code</span> <span class="req-star">*</span>
+            </label>
+            <div class="input-wrap">
+              <input type="text" id="entityId" class="gov-input text-upper" placeholder="e.g. GDN-GRN-04">
             </div>
           </div>
 

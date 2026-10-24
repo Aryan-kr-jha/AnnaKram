@@ -320,14 +320,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update Profile Name, Avatar Initials, and Depot Header dynamically
     const profileName = document.querySelector('.profile-name');
+    const menuProfileName = document.getElementById('menuProfileName');
+    const menuProfileEmail = document.getElementById('menuProfileEmail');
     const avatarBadge = document.querySelector('.avatar-badge');
     const depotSubtext = document.querySelector('.depot-subtext');
 
     if (profileName && currentUser?.name) {
         profileName.textContent = currentUser.name;
     }
+    if (menuProfileName && currentUser?.name) {
+        menuProfileName.textContent = currentUser.name;
+    }
+    if (menuProfileEmail && currentUser?.email) {
+        menuProfileEmail.textContent = currentUser.email;
+    }
     if (avatarBadge && currentUser?.name) {
-        avatarBadge.textContent = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        avatarBadge.textContent = currentUser.name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
     }
     if (depotSubtext && currentUser?.entity_id) {
         depotSubtext.textContent = `DEPOT: ${currentUser.entity_id} | Regional Division | Superintendent: ${currentUser.name || 'Aryan Kumar'}`;

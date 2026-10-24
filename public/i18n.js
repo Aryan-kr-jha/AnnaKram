@@ -22,20 +22,20 @@ const ANNAKRAM_I18N = {
 
     // Central Godown Navigation
     navCentralDashboard: "Central Dashboard",
-    navStackBays: "Stack & Silo Bays",
-    navIndentRequisitions: "PDS Indent Requisitions",
-    navActiveBatches: "Active Stock Batches",
+    navStackBays: "Warehouse",
+    navIndentRequisitions: "FPS Requests",
+    navActiveBatches: "e-Way Bill Scanner",
     navFifoDispatch: "FIFO Outward Dispatch",
-    navDeliveryChallans: "Delivery Challans",
-    navCompliance: "Statutory Compliance",
+    navDeliveryChallans: "Challan Generator",
+    navCompliance: "Dispatch History",
 
     // Central Godown KPIs
-    kpiTotalDepotStock: "Total Depot Stock",
-    kpiStorageLimit: "Storage Capacity Limit",
+    kpiTotalDepotStock: "TOTAL BUFFER STOCK",
+    kpiStorageLimit: "INCOMING STOCK",
     kpiWarehouseOccupancy: "Warehouse Bay Occupancy",
     kpiOldestBatch: "Oldest Eligible Batch",
-    kpiAgingAlert: "Critical Aging Alert (>90 Days)",
-    kpiPendingIndents: "Pending FPS Indents",
+    kpiAgingAlert: "EXTENDED STORAGE NOTICE",
+    kpiPendingIndents: "SERVING FPS OUTLETS",
     kpiInTransit: "In-Transit Deliveries",
 
     // Commodity Names
@@ -47,9 +47,9 @@ const ANNAKRAM_I18N = {
     // Godown Gate Scanner & Stock Ingestion
     scanTitle: "Automated QR Manifest Decoder & Gate Scanner",
     scanSubtitle: "Scan verified FCI / State Civil Supplies Mandi Transit Pass or Upload QR File",
-    tabPresets: "Mandi Presets",
-    tabCamera: "Live Camera Stream",
-    tabUpload: "QR Image File",
+    tabPresets: "Verified Mandi Passes",
+    tabCamera: "Live Camera",
+    tabUpload: "Upload QR File",
     mandiSelectHint: "Select Verified State Government Consignment Pass:",
     startCamera: "Start Camera Scanner",
     stopCamera: "Stop Camera Stream",
@@ -133,7 +133,7 @@ const ANNAKRAM_I18N = {
     btnStartCamera: "Turn On Camera",
     btnStopCamera: "Stop Camera",
     dropzoneTitle: "Drop e-Way Bill QR Image or Click to Browse",
-    ewbVerified: "✅ E-WAY BILL VERIFIED",
+    ewbVerified: "E-WAY BILL VERIFIED",
     btnConfirmDecoded: "📥 Authorize Gate Inward & Store Batch",
     directInwardTitle: "Direct Inward Entry",
     lblEwayBillNo: "e-Way Bill Number",
@@ -255,20 +255,20 @@ const ANNAKRAM_I18N = {
 
     // Central Godown Navigation
     navCentralDashboard: "केंद्रीय डैशबोर्ड",
-    navStackBays: "स्टैक एवं साइलो बे",
-    navIndentRequisitions: "राशन इंडेंट मांग",
-    navActiveBatches: "सक्रिय स्टॉक लॉट/बैच",
+    navStackBays: "गोदाम",
+    navIndentRequisitions: "एफपीएस अनुरोध",
+    navActiveBatches: "ई-वे बिल स्कैनर",
     navFifoDispatch: "FIFO निकासी डिस्पैच",
-    navDeliveryChallans: "डिलीवरी चालान",
-    navCompliance: "वैधानिक अनुपालन",
+    navDeliveryChallans: "चालान जनरेटर",
+    navCompliance: "डिस्पैच इतिहास",
 
     // Central Godown KPIs
-    kpiTotalDepotStock: "कुल डिपो खाद्यान्न स्टॉक",
-    kpiStorageLimit: "भंडारण क्षमता सीमा",
+    kpiTotalDepotStock: "कुल बफर स्टॉक",
+    kpiStorageLimit: "आवक स्टॉक",
     kpiWarehouseOccupancy: "वेयरहाउस ऑक्यूपेंसी दर",
     kpiOldestBatch: "सर्वप्रथम निकासी योग्य बैच",
-    kpiAgingAlert: "अत्यधिक पुराना स्टॉक (>90 दिन)",
-    kpiPendingIndents: "लंबित राशन मांग (इंडेंट)",
+    kpiAgingAlert: "विस्तारित भंडारण सूचना",
+    kpiPendingIndents: "सेवा प्रदाता FPS केंद्र",
     kpiInTransit: "मार्गस्थ प्रेषण (ट्रांजिट)",
 
     // Commodity Names
@@ -280,9 +280,9 @@ const ANNAKRAM_I18N = {
     // Godown Gate Scanner & Stock Ingestion
     scanTitle: "स्वचालित ई-वे बिल / क्यूआर स्कैनर",
     scanSubtitle: "भारतीय खाद्य निगम (FCI) एवं राज्य नागरिक आपूर्ति पास स्कैन या अपलोड करें",
-    tabPresets: "मानक मंडी ई-वे बिल",
-    tabCamera: "लाइव कैमरा स्कैनर",
-    tabUpload: "क्यूआर इमेज अपलोड",
+    tabPresets: "सत्यापित मंडी पास",
+    tabCamera: "लाइव कैमरा",
+    tabUpload: "क्यूआर फाइल अपलोड",
     mandiSelectHint: "सत्यापित राज्य सरकारी मंडी आवक पास चुनें:",
     startCamera: "कैमरा स्कैनर शुरू करें",
     stopCamera: "कैमरा बंद करें",
@@ -366,7 +366,7 @@ const ANNAKRAM_I18N = {
     btnStartCamera: "कैमरा चालू करें",
     btnStopCamera: "कैमरा बंद करें",
     dropzoneTitle: "ई-वे बिल क्यूआर इमेज यहाँ डालें या फ़ाइल चुनें",
-    ewbVerified: "✅ ई-वे बिल सत्यापित",
+    ewbVerified: "ई-वे बिल सत्यापित",
     btnConfirmDecoded: "📥 गेट आवक अधिकृत करें एवं बैच सुरक्षित करें",
     directInwardTitle: "प्रत्यक्ष आवक प्रविष्टि",
     lblEwayBillNo: "ई-वे बिल संख्या",
